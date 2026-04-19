@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Kalkulator — By Simic Studio</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f0eeea;
+    color: #1a1a1a;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    background: #fff;
+    border-bottom: 0.5px solid #e0e0e0;
+    padding: 14px 16px 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar h1 { font-size: 16px; font-weight: 600; }
+  .topbar p { font-size: 12px; color: #888; margin-top: 1px; }
+
+  .page { padding: 12px 14px 100px; }
+
+  .card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 10px;
+    border: 0.5px solid #e8e8e8;
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 14px;
+  }
+
+  /* Materijal rows */
+  .mat-header {
+    display: grid;
+    grid-template-columns: 1fr 72px 58px 30px;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .mat-header span { font-size: 11px; color: #bbb; }
+  .mat-header span:nth-child(2), .mat-header span:nth-child(3) { text-align: right; }
+
+  .mat-row {
+    display: grid;
+    grid-template-columns: 1fr 72px 58px 30px;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .mat-row select, .mat-row input[type=number] {
+    width: 100%;
+    font-size: 13px;
+    padding: 8px 8px;
+    border: 0.5px solid #e0e0e0;
+    border-radius: 10px;
+    background: #f7f7f5;
+    color: #1a1a1a;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .mat-row select { font-size: 12px; padding: 8px 6px; }
+  .mat-row input[type=number] { text-align: right; }
+
+  .del-btn {
+    background: none;
+    border: none;
+    color: #ccc;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+  }
+  .del-btn:active { color: #e74c3c; }
+
+  .add-btn {
+    font-size: 13px;
+    color: #1D9E75;
+    background: none;
+    border: 0.5px solid #1D9E75;
+    border-radius: 10px;
+    padding: 8px 14px;
+    cursor: pointer;
+    margin-top: 4px;
+    width: 100%;
+  }
+
+  /* Field rows */
+  .field-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 0.5px solid #f0f0f0;
+  }
+  .field-row:last-child { border-bottom: none; }
+  .field-row label { font-size: 14px; color: #444; flex: 1; }
+  .field-row .input-wrap { display: flex; align-items: center; gap: 6px; }
+  .field-row input[type=number] {
+    width: 90px;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 7px 10px;
+    border: 0.5px solid #e0e0e0;
+    border-radius: 10px;
+    background: #f7f7f5;
+    color: #1a1a1a;
+    text-align: right;
+    -webkit-appearance: none;
+  }
+  .field-row .unit { font-size: 12px; color: #bbb; min-width: 30px; }
+
+  /* Slider rows */
+  .slider-row {
+    padding: 10px 0;
+    border-bottom: 0.5px solid #f0f0f0;
+  }
+  .slider-row:last-child { border-bottom: none; }
+  .slider-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .slider-top label { font-size: 14px; color: #444; }
+  .slider-top .sval { font-size: 16px; font-weight: 600; color: #1a1a1a; }
+  input[type=range] {
+    width: 100%;
+    height: 4px;
+    accent-color: #1D9E75;
+  }
+  .slider-hint { font-size: 11px; color: #bbb; margin-top: 4px; }
+
+  /* Metrics grid */
+  .metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .metric {
+    background: #f7f7f5;
+    border-radius: 12px;
+    padding: 12px;
+  }
+  .metric.accent {
+    background: #E1F5EE;
+  }
+  .metric .ml { font-size: 11px; color: #999; margin-bottom: 4px; line-height: 1.3; }
+  .metric .mv { font-size: 18px; font-weight: 600; color: #1a1a1a; }
+  .metric.accent .mv { color: #0F6E56; }
+
+  /* Result breakdown */
+  .breakdown { border-top: 0.5px solid #f0f0f0; padding-top: 12px; }
+  .br-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 0.5px solid #f5f5f5;
+  }
+  .br-row:last-child { border-bottom: none; }
+  .br-row .bl { font-size: 13px; color: #666; }
+  .br-row .bv { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+  .br-row.total { padding-top: 12px; border-top: 1px solid #eee; margin-top: 4px; }
+  .br-row.total .bl { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+  .br-row.total .bv { font-size: 22px; font-weight: 700; color: #0F6E56; }
+
+  /* Save section */
+  .save-inputs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .save-inputs input[type=text] {
+    width: 100%;
+    font-size: 15px;
+    padding: 12px 14px;
+    border: 0.5px solid #e0e0e0;
+    border-radius: 12px;
+    background: #f7f7f5;
+    color: #1a1a1a;
+  }
+  .save-inputs input[type=text]::placeholder { color: #bbb; }
+
+  .save-btn {
+    width: 100%;
+    padding: 15px;
+    background: #0F6E56;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+  }
+  .save-btn:active { background: #085041; }
+
+  .copy-box {
+    display: none;
+    margin-top: 12px;
+    background: #f7f7f5;
+    border-radius: 12px;
+    padding: 12px;
+  }
+  .copy-box.show { display: block; }
+  .copy-box .cb-title { font-size: 12px; color: #888; margin-bottom: 8px; }
+  .copy-text {
+    font-size: 11px;
+    font-family: monospace;
+    color: #555;
+    background: #fff;
+    border: 0.5px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 8px;
+    word-break: break-all;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+  .copy-actions { display: flex; gap: 8px; }
+  .copy-actions button {
+    flex: 1;
+    padding: 11px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .btn-copy {
+    background: #fff;
+    border: 0.5px solid #e0e0e0;
+    color: #444;
+  }
+  .btn-sheet {
+    background: #0F6E56;
+    border: none;
+    color: #fff;
+  }
+
+  .rabat-note { font-size: 11px; color: #bbb; margin-top: 8px; }
+
+  /* Bottom nav spacing */
+  .bottom-space { height: 20px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>By Simic Studio</h1>
+  <p>Kalkulator nameštaja po meri</p>
+</div>
+
+<div class="page">
+
+  <!-- MATERIJAL -->
+  <div class="card">
+    <div class="card-title">Materijal — DrvoLux</div>
+    <div class="mat-header">
+      <span>Artikal</span>
+      <span>Cena</span>
+      <span>Kol.</span>
+      <span></span>
+    </div>
+    <div id="mat-list"></div>
+    <button class="add-btn" onclick="addRow()">+ Dodaj artikal</button>
+    <div class="rabat-note">Cene sa 10% rabatom već oduzet</div>
+  </div>
+
+  <!-- RAD I LOGISTIKA -->
+  <div class="card">
+    <div class="card-title">Rad i logistika</div>
+
+    <div class="field-row">
+      <label>Satnica</label>
+      <div class="input-wrap">
+        <input type="number" id="satnica" value="1200" min="0" oninput="calc()">
+        <span class="unit">RSD/h</span>
+      </div>
+    </div>
+    <div class="field-row">
+      <label>Sati rada</label>
+      <div class="input-wrap">
+        <input type="number" id="sati" value="8" min="0" oninput="calc()">
+        <span class="unit">h</span>
+      </div>
+    </div>
+    <div class="field-row">
+      <label>Pomoćni radnik</label>
+      <div class="input-wrap">
+        <input type="number" id="pomocni" value="0" min="0" oninput="calc()">
+        <span class="unit">dana</span>
+      </div>
+    </div>
+    <div class="field-row">
+      <label>Km od Beograda</label>
+      <div class="input-wrap">
+        <input type="number" id="km" value="0" min="0" oninput="calc()">
+        <span class="unit">km</span>
+      </div>
+    </div>
+    <div class="field-row">
+      <label>Sprat bez lifta</label>
+      <div class="input-wrap">
+        <input type="number" id="sprat" value="0" min="0" oninput="calc()">
+        <span class="unit">sp.</span>
+      </div>
+    </div>
+    <div class="field-row">
+      <label>Dnevnica</label>
+      <div class="input-wrap">
+        <input type="number" id="dnevnica" value="0" min="0" oninput="calc()">
+        <span class="unit">dana</span>
+      </div>
+    </div>
+    <div class="field-row">
+      <label>Ostalo</label>
+      <div class="input-wrap">
+        <input type="number" id="ostali" value="0" min="0" oninput="calc()">
+        <span class="unit">RSD</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MARŽA -->
+  <div class="card">
+    <div class="card-title">Marža i popust</div>
+
+    <div class="slider-row">
+      <div class="slider-top">
+        <label>Marža na materijal</label>
+        <span class="sval" id="mOut">25%</span>
+      </div>
+      <input type="range" min="0" max="80" step="1" value="25" id="marza" oninput="mOut.textContent=this.value+'%';calc()">
+      <div class="slider-hint">Koliko dodaješ na cenu materijala za sebe</div>
+    </div>
+
+    <div class="slider-row">
+      <div class="slider-top">
+        <label>Popust klijentu</label>
+        <span class="sval" id="pOut">0%</span>
+      </div>
+      <input type="range" min="0" max="30" step="1" value="0" id="popust" oninput="pOut.textContent=this.value+'%';calc()">
+      <div class="slider-hint">Popust na finalnu cenu — smanjuje zaradu</div>
+    </div>
+  </div>
+
+  <!-- REZULTAT -->
+  <div class="card">
+    <div class="card-title">Rezultat</div>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="ml">Materijal sa maržom</div>
+        <div class="mv" id="r-mat">0</div>
+      </div>
+      <div class="metric">
+        <div class="ml">Rad i logistika</div>
+        <div class="mv" id="r-rad">0</div>
+      </div>
+      <div class="metric">
+        <div class="ml">Pre popusta</div>
+        <div class="mv" id="r-ukupno">0</div>
+      </div>
+      <div class="metric accent">
+        <div class="ml">Finalna cena za klijenta</div>
+        <div class="mv" id="r-final">0</div>
+      </div>
+    </div>
+
+    <div class="breakdown">
+      <div class="br-row">
+        <span class="bl">Zarada na radu</span>
+        <span class="bv" id="r-zarada">0 RSD</span>
+      </div>
+      <div class="br-row">
+        <span class="bl">Zarada na materijalu</span>
+        <span class="bv" id="r-mprofit">0 RSD</span>
+      </div>
+      <div class="br-row">
+        <span class="bl">Efektivna satnica</span>
+        <span class="bv" id="r-eff">—</span>
+      </div>
+      <div class="br-row total">
+        <span class="bl">Ukupna zarada</span>
+        <span class="bv" id="r-profit">0 RSD</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAČUVAJ -->
+  <div class="card">
+    <div class="card-title">Sačuvaj posao</div>
+    <div class="save-inputs">
+      <input type="text" id="ime-posla" placeholder="Naziv posla (npr. Kuhinja Zemun)">
+      <input type="text" id="ime-klijenta" placeholder="Ime klijenta">
+    </div>
+    <button class="save-btn" onclick="generateSave()">Pripremi za evidenciju</button>
+
+    <div class="copy-box" id="copy-box">
+      <div class="cb-title">Kopiraj i zalepi u Google Sheet (Ctrl+Shift+V):</div>
+      <div class="copy-text" id="copy-text"></div>
+      <div class="copy-actions">
+        <button class="btn-copy" onclick="copyText()">Kopiraj red</button>
+        <button class="btn-sheet" onclick="window.open('https://docs.google.com/spreadsheets/d/1TYuSEyBY6C0112El4Izo1XtfCLKq5243i-tht5Zr7AU/edit','_blank')">Otvori Sheet</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-space"></div>
+</div>
+
+<script>
+const RABAT = 0.10;
+const DRVOLUX = [
+  {sifra:'D152/18',  naziv:'Korpus Bela Kastamonu 18mm', tip:'Ploča',      jm:'m²', cena:1249},
+  {sifra:'U12168/18',naziv:'Kasmir Grau 18mm',           tip:'Ploča',      jm:'m²', cena:1869},
+  {sifra:'HDF2201',  naziv:'HDF Beli PF',                tip:'Ploča',      jm:'m²', cena:549},
+  {sifra:'10482G',   naziv:'ABS Bela glatka 23/1',       tip:'Kant traka', jm:'m',  cena:87},
+  {sifra:'U702',     naziv:'ABS Kasmir 23/0.8',          tip:'Kant traka', jm:'m',  cena:138},
+  {sifra:'730425',   naziv:'PVC Kasmir 23/0.5',          tip:'Kant traka', jm:'m',  cena:51},
+  {sifra:'AP23/2',   naziv:'Kantovanje ABS 23/2mm',      tip:'Usluga',     jm:'m',  cena:78},
+  {sifra:'KP23/0.4', naziv:'Kantovanje PVC 23/0.4mm',    tip:'Usluga',     jm:'m',  cena:45},
+];
+
+function cr(c) { return Math.round(c * (1 - RABAT)); }
+function fmt(n) { return Math.round(n).toLocaleString('sr-RS') + ' RSD'; }
+function fmtS(n) { return Math.round(n).toLocaleString('sr-RS'); }
+
+let rows = [
+  {sifra:'D152/18', qty:5},
+  {sifra:'10482G',  qty:20},
+  {sifra:'AP23/2',  qty:20},
+];
+
+function buildSelect(sel) {
+  let o = '<option value="">— Artikal —</option>';
+  let g = {};
+  DRVOLUX.forEach(x => { if(!g[x.tip]) g[x.tip]=[]; g[x.tip].push(x); });
+  Object.entries(g).forEach(([tip, items]) => {
+    o += `<optgroup label="${tip}">`;
+    items.forEach(x => {
+      o += `<option value="${x.sifra}"${x.sifra===sel?' selected':''}>${x.naziv} (${cr(x.cena).toLocaleString('sr-RS')}/${x.jm})</option>`;
+    });
+    o += '</optgroup>';
+  });
+  return o;
+}
+
+function renderRows() {
+  const el = document.getElementById('mat-list');
+  el.innerHTML = '';
+  rows.forEach((r, i) => {
+    const it = DRVOLUX.find(x => x.sifra === r.sifra);
+    const cena = it ? cr(it.cena) : 0;
+    const d = document.createElement('div');
+    d.className = 'mat-row';
+    d.innerHTML = `
+      <select onchange="rows[${i}].sifra=this.value;renderRows();">${buildSelect(r.sifra)}</select>
+      <input type="number" value="${cena}" readonly style="opacity:0.6;">
+      <input type="number" value="${r.qty}" min="0" step="0.01" oninput="rows[${i}].qty=+this.value;calc()">
+      <button class="del-btn" onclick="rows.splice(${i},1);renderRows();">×</button>`;
+    el.appendChild(d);
+  });
+  calc();
+}
+
+function addRow() { rows.push({sifra:'', qty:1}); renderRows(); }
+
+function getV() {
+  let matBase = 0;
+  rows.forEach(r => {
+    const it = DRVOLUX.find(x => x.sifra === r.sifra);
+    if(it) matBase += cr(it.cena) * r.qty;
+  });
+  const marza    = +document.getElementById('marza').value / 100;
+  const popust   = +document.getElementById('popust').value / 100;
+  const satnica  = +document.getElementById('satnica').value || 1200;
+  const sati     = +document.getElementById('sati').value || 0;
+  const pomocni  = (+document.getElementById('pomocni').value || 0) * 11750;
+  const km       = +document.getElementById('km').value || 0;
+  const sprat    = (+document.getElementById('sprat').value || 0) * 2500;
+  const dnevnica = (+document.getElementById('dnevnica').value || 0) * 6000;
+  const ostali   = +document.getElementById('ostali').value || 0;
+
+  let gorivo = 0;
+  if(km > 80) gorivo = km * 2 * 20;
+  else if(km > 30) gorivo = km * 2 * 15;
+
+  const matM   = matBase * (1 + marza);
+  const rad    = satnica * sati + pomocni + gorivo + sprat + dnevnica + ostali;
+  const ukupno = matM + rad;
+  const final  = ukupno * (1 - popust);
+  const pi     = ukupno - final;
+  const profit = matBase * marza + satnica * sati - pi;
+
+  return {matBase, matM, rad, ukupno, final, pi, profit, marza, popust, satnica, sati};
+}
+
+function calc() {
+  const v = getV();
+  document.getElementById('r-mat').textContent    = fmtS(v.matM);
+  document.getElementById('r-rad').textContent    = fmtS(v.rad);
+  document.getElementById('r-ukupno').textContent = fmtS(v.ukupno);
+  document.getElementById('r-final').textContent  = fmtS(v.final);
+  document.getElementById('r-zarada').textContent = fmt(v.satnica * v.sati);
+  document.getElementById('r-mprofit').textContent= fmt(v.matBase * v.marza - v.pi);
+  document.getElementById('r-profit').textContent = fmt(v.profit);
+  document.getElementById('r-eff').textContent    = v.sati > 0
+    ? Math.round(v.profit / v.sati).toLocaleString('sr-RS') + ' RSD/h' : '—';
+}
+
+function generateSave() {
+  const ime     = document.getElementById('ime-posla').value.trim();
+  const klijent = document.getElementById('ime-klijenta').value.trim();
+  if(!ime) { alert('Unesi naziv posla'); return; }
+
+  const v     = getV();
+  const danas = new Date().toLocaleDateString('sr-RS');
+
+  const red = [
+    danas,
+    ime,
+    klijent || '—',
+    Math.round(v.matBase),
+    Math.round(v.matM),
+    Math.round(v.rad),
+    Math.round(v.ukupno),
+    Math.round(v.final),
+    Math.round(v.profit),
+    Math.round(v.marza * 100) + '%',
+    'Na čekanju',
+    ''
+  ].join('\t');
+
+  document.getElementById('copy-text').textContent = red;
+  document.getElementById('copy-box').className = 'copy-box show';
+}
+
+function copyText() {
+  const txt = document.getElementById('copy-text').textContent;
+  if(navigator.clipboard) {
+    navigator.clipboard.writeText(txt).then(() => {
+      const btn = document.querySelector('.btn-copy');
+      btn.textContent = 'Kopirano!';
+      setTimeout(() => btn.textContent = 'Kopiraj red', 2000);
+    });
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = txt;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = 'Kopirano!';
+    setTimeout(() => btn.textContent = 'Kopiraj red', 2000);
+  }
+}
+
+renderRows();
+</script>
+</body>
+</html>
