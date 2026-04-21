@@ -70,6 +70,7 @@
   <p>Kalkulator nameštaja po meri</p>
 </div>
 <div class="page">
+
   <div class="card">
     <div class="card-title">Materijal — DrvoLux</div>
     <div class="mat-header"><span>Artikal</span><span>Cena</span><span>Kol.</span><span></span></div>
@@ -77,6 +78,7 @@
     <button class="add-btn" onclick="addRow()">+ Dodaj artikal</button>
     <div class="rabat-note">Cene sa 10% rabatom već oduzet</div>
   </div>
+
   <div class="card">
     <div class="card-title">Rad i logistika</div>
     <div class="field-row"><div class="field-label">Satnica</div><div class="input-wrap"><input type="number" id="satnica" value="1200" min="0" inputmode="numeric" oninput="calc()"><span class="unit">RSD/h</span></div></div>
@@ -87,6 +89,7 @@
     <div class="field-row"><div><div class="field-label">Dnevnica</div><div class="field-sub">6.000 RSD / dan</div></div><div class="input-wrap"><input type="number" id="dnevnica" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">dana</span></div></div>
     <div class="field-row"><div class="field-label">Ostali troškovi</div><div class="input-wrap"><input type="number" id="ostali" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">RSD</span></div></div>
   </div>
+
   <div class="card">
     <div class="card-title">Marža i popust</div>
     <div class="slider-row">
@@ -100,6 +103,7 @@
       <div class="slider-hint">Smanjuje finalnu cenu i tvoju zaradu</div>
     </div>
   </div>
+
   <div class="card">
     <div class="card-title">Rezultat</div>
     <div class="metrics">
@@ -115,20 +119,23 @@
       <div class="br-row total"><span class="bl">Ukupna zarada</span><span class="bv" id="r-profit">0 RSD</span></div>
     </div>
   </div>
+
   <div class="card">
     <div class="card-title">Sačuvaj u evidenciju</div>
     <div class="save-inputs">
       <input type="text" id="ime-posla" placeholder="Naziv posla (npr. Kuhinja Zemun)">
       <input type="text" id="ime-klijenta" placeholder="Ime klijenta">
     </div>
-    <button class="save-btn" id="save-btn" onclick="saveToSheet()">Sačuvaj u Google Sheet</button>
+    <button class="save-btn" id="save-btn" onclick="saveToSheet()">Sačuvaj u evidenciju</button>
     <div class="toast" id="toast"></div>
   </div>
-</div>
 
+</div>
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhoOdI61UTqLgBOFZsUjan94nG2czkeLk0gbqBPJh-GS_6gdXo1tLZEHxQzZq5_bWq3Q/exec';
+const SUPABASE_URL = 'https://cybggjhgsqzwyzoxldkw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5Ymdnamhnc3F6d3l6b3hsZGt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3OTE2MjQsImV4cCI6MjA5MjM2NzYyNH0.mbOxQGmwVCUqq88b6PZ2cn9trGn2N5fh9yuYOWupR5o';
 const RABAT = 0.10;
+
 const DRVOLUX = [
   {sifra:'D152/18',   naziv:'Korpus Bela Kastamonu 18mm', tip:'Ploča',      jm:'m²', cena:1249},
   {sifra:'U12168/18', naziv:'Kasmir Grau 18mm',           tip:'Ploča',      jm:'m²', cena:1869},
@@ -139,10 +146,13 @@ const DRVOLUX = [
   {sifra:'AP23/2',    naziv:'Kantovanje ABS 23/2mm',      tip:'Usluga',     jm:'m',  cena:78},
   {sifra:'KP23/0.4',  naziv:'Kantovanje PVC 23/0.4mm',    tip:'Usluga',     jm:'m',  cena:45},
 ];
+
 function cr(c){return Math.round(c*(1-RABAT));}
 function fmt(n){return Math.round(n).toLocaleString('sr-RS')+' RSD';}
 function fmtN(n){return Math.round(n).toLocaleString('sr-RS');}
+
 let rows=[{sifra:'D152/18',qty:5},{sifra:'10482G',qty:20},{sifra:'AP23/2',qty:20}];
+
 function buildSelect(sel){
   let o='<option value="">— Odaberi —</option>',g={};
   DRVOLUX.forEach(x=>{if(!g[x.tip])g[x.tip]=[];g[x.tip].push(x);});
@@ -153,19 +163,24 @@ function buildSelect(sel){
   });
   return o;
 }
+
 function renderRows(){
   const el=document.getElementById('mat-list');el.innerHTML='';
   rows.forEach((r,i)=>{
     const it=DRVOLUX.find(x=>x.sifra===r.sifra),cena=it?cr(it.cena):0;
     const d=document.createElement('div');d.className='mat-row';
-    d.innerHTML=`<select onchange="rows[${i}].sifra=this.value;renderRows();">${buildSelect(r.sifra)}</select>
+    d.innerHTML=`
+      <select onchange="rows[${i}].sifra=this.value;renderRows();">${buildSelect(r.sifra)}</select>
       <input type="number" value="${cena}" readonly style="opacity:0.5;">
       <input type="number" value="${r.qty}" min="0" step="0.01" inputmode="decimal" oninput="rows[${i}].qty=+this.value;calc()">
       <button class="del-btn" onclick="rows.splice(${i},1);renderRows();">×</button>`;
     el.appendChild(d);
-  });calc();
+  });
+  calc();
 }
+
 function addRow(){rows.push({sifra:'',qty:1});renderRows();}
+
 function getV(){
   let matBase=0;
   rows.forEach(r=>{const it=DRVOLUX.find(x=>x.sifra===r.sifra);if(it)matBase+=cr(it.cena)*r.qty;});
@@ -183,11 +198,13 @@ function getV(){
   else if(km>30){gorivo=km*2*15;kmHint=fmtN(gorivo)+' RSD (15/km)';}
   else if(km>0){kmHint='besplatno (do 30km)';}
   document.getElementById('km-hint').textContent=kmHint;
-  const matM=matBase*(1+marza),rad=satnica*sati+pomocni+gorivo+sprat+dnevnica+ostali;
+  const matM=matBase*(1+marza);
+  const rad=satnica*sati+pomocni+gorivo+sprat+dnevnica+ostali;
   const ukupno=matM+rad,final=ukupno*(1-popust),pi=ukupno-final;
   const profit=matBase*marza+satnica*sati-pi;
   return{matBase,matM,rad,ukupno,final,pi,profit,marza,popust,satnica,sati};
 }
+
 function calc(){
   const v=getV();
   document.getElementById('r-mat').textContent=fmtN(v.matM);
@@ -199,58 +216,64 @@ function calc(){
   document.getElementById('r-profit').textContent=fmt(v.profit);
   document.getElementById('r-eff').textContent=v.sati>0?Math.round(v.profit/v.sati).toLocaleString('sr-RS')+' RSD/h':'—';
 }
-function showToast(msg,tip){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+tip;}
+
+function showToast(msg,tip){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+tip;
+}
 
 async function saveToSheet(){
   const ime=document.getElementById('ime-posla').value.trim();
   const klijent=document.getElementById('ime-klijenta').value.trim();
   if(!ime){showToast('Unesi naziv posla','err');return;}
+
   const v=getV();
   const btn=document.getElementById('save-btn');
   btn.disabled=true;
-  showToast('Čuvam u sheet...','loading');
+  showToast('Čuvam...','loading');
 
-  // Saljemo kao individualne URL parametre — bez JSON enkodiranja
-  const params = new URLSearchParams({
-    datum:    new Date().toLocaleDateString('sr-RS'),
-    posao:    ime,
-    klijent:  klijent||'—',
+  const payload={
+    datum:         new Date().toLocaleDateString('sr-RS'),
+    posao:         ime,
+    klijent:       klijent||'—',
     mat_nabavna:   Math.round(v.matBase),
     mat_marza:     Math.round(v.matM),
-    rad:           Math.round(v.rad),
-    ukupno:        Math.round(v.ukupno),
-    finalna:       Math.round(v.final),
+    rad_logistika: Math.round(v.rad),
+    ukupno_pre:    Math.round(v.ukupno),
+    finalna_cena:  Math.round(v.final),
     zarada:        Math.round(v.profit),
-    marza:         Math.round(v.marza*100)+'%',
-    status:        'Na cekanju',
+    marza_proc:    Math.round(v.marza*100)+'%',
+    status:        'Na čekanju',
     napomena:      ''
-  });
-
-  const url = SCRIPT_URL + '?' + params.toString();
+  };
 
   try {
-    const res = await fetch(url, { mode: 'cors' });
-    const data = await res.json();
-    if(data.success) {
-      showToast('Sačuvano u sheet!', 'ok');
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/poslovi`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if(res.ok || res.status === 201) {
+      showToast('Sačuvano u evidenciju!', 'ok');
       document.getElementById('ime-posla').value='';
       document.getElementById('ime-klijenta').value='';
     } else {
-      showToast('Greška: '+data.greska, 'err');
+      const err = await res.text();
+      showToast('Greška: '+err, 'err');
     }
-  } catch(err) {
-    // Pokusaj no-cors ako cors ne radi
-    try {
-      await fetch(url, { mode: 'no-cors' });
-      showToast('Sačuvano! Provjeri sheet.', 'ok');
-      document.getElementById('ime-posla').value='';
-      document.getElementById('ime-klijenta').value='';
-    } catch(e) {
-      showToast('Greška: '+e.message, 'err');
-    }
+  } catch(err){
+    showToast('Greška: '+err.message,'err');
   }
+
   btn.disabled=false;
 }
+
 renderRows();
 </script>
 </body>
