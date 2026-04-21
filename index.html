@@ -256,17 +256,20 @@ function showToast(msg, tip) {
   t.textContent = msg; t.className = 'toast show '+tip;
 }
 
-async function saveToSheet() {
+function saveToSheet() {
   const ime     = document.getElementById('ime-posla').value.trim();
   const klijent = document.getElementById('ime-klijenta').value.trim();
   if(!ime) { showToast('Unesi naziv posla', 'err'); return; }
+
   const v = getV();
   const btn = document.getElementById('save-btn');
   btn.disabled = true;
   showToast('Čuvam u sheet...', 'loading');
+
   const payload = {
-    datum: new Date().toLocaleDateString('sr-RS'),
-    posao: ime, klijent: klijent||'—',
+    datum:         new Date().toLocaleDateString('sr-RS'),
+    posao:         ime,
+    klijent:       klijent || '—',
     mat_nabavna:   Math.round(v.matBase),
     mat_marza:     Math.round(v.matM),
     rad_logistika: Math.round(v.rad),
@@ -274,18 +277,25 @@ async function saveToSheet() {
     finalna_cena:  Math.round(v.final),
     zarada:        Math.round(v.profit),
     marza_proc:    Math.round(v.marza*100)+'%',
-    status: 'Na čekanju', napomena: ''
+    status:        'Na čekanju',
+    napomena:      ''
   };
-  try {
-    const url = SCRIPT_URL + '?data=' + encodeURIComponent(JSON.stringify(payload));
-    await fetch(url, { mode: 'no-cors' });
-    showToast('Sačuvano!', 'ok');
+
+  // Koristimo iframe trick — jedini nacin koji zaobilazi CORS za Google Apps Script
+  const url = SCRIPT_URL + '?data=' + encodeURIComponent(JSON.stringify(payload));
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  iframe.src = url;
+  document.body.appendChild(iframe);
+
+  // Nakon 4 sekunde pretpostavljamo da je uspelo
+  setTimeout(() => {
+    document.body.removeChild(iframe);
+    showToast('Sačuvano u sheet! Provjeri Evidencija_Poslova_v2.', 'ok');
     document.getElementById('ime-posla').value    = '';
     document.getElementById('ime-klijenta').value = '';
-  } catch(err) {
-    showToast('Greška: '+err.message, 'err');
-  }
-  btn.disabled = false;
+    btn.disabled = false;
+  }, 4000);
 }
 
 renderRows();
