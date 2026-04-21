@@ -65,56 +65,28 @@
 </style>
 </head>
 <body>
-
 <div class="topbar">
   <h1>By Simic Studio</h1>
   <p>Kalkulator nameštaja po meri</p>
 </div>
-
 <div class="page">
-
   <div class="card">
     <div class="card-title">Materijal — DrvoLux</div>
-    <div class="mat-header">
-      <span>Artikal</span><span>Cena</span><span>Kol.</span><span></span>
-    </div>
+    <div class="mat-header"><span>Artikal</span><span>Cena</span><span>Kol.</span><span></span></div>
     <div id="mat-list"></div>
     <button class="add-btn" onclick="addRow()">+ Dodaj artikal</button>
     <div class="rabat-note">Cene sa 10% rabatom već oduzet</div>
   </div>
-
   <div class="card">
     <div class="card-title">Rad i logistika</div>
-    <div class="field-row">
-      <div class="field-label">Satnica</div>
-      <div class="input-wrap"><input type="number" id="satnica" value="1200" min="0" inputmode="numeric" oninput="calc()"><span class="unit">RSD/h</span></div>
-    </div>
-    <div class="field-row">
-      <div class="field-label">Sati rada</div>
-      <div class="input-wrap"><input type="number" id="sati" value="8" min="0" inputmode="numeric" oninput="calc()"><span class="unit">h</span></div>
-    </div>
-    <div class="field-row">
-      <div><div class="field-label">Pomoćni radnik</div><div class="field-sub">11.750 RSD / dan</div></div>
-      <div class="input-wrap"><input type="number" id="pomocni" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">dana</span></div>
-    </div>
-    <div class="field-row">
-      <div><div class="field-label">Udaljenost</div><div class="field-sub" id="km-hint">do 30km = besplatno</div></div>
-      <div class="input-wrap"><input type="number" id="km" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">km</span></div>
-    </div>
-    <div class="field-row">
-      <div><div class="field-label">Sprat bez lifta</div><div class="field-sub">2.500 RSD / sprat</div></div>
-      <div class="input-wrap"><input type="number" id="sprat" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">sp.</span></div>
-    </div>
-    <div class="field-row">
-      <div><div class="field-label">Dnevnica</div><div class="field-sub">6.000 RSD / dan</div></div>
-      <div class="input-wrap"><input type="number" id="dnevnica" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">dana</span></div>
-    </div>
-    <div class="field-row">
-      <div class="field-label">Ostali troškovi</div>
-      <div class="input-wrap"><input type="number" id="ostali" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">RSD</span></div>
-    </div>
+    <div class="field-row"><div class="field-label">Satnica</div><div class="input-wrap"><input type="number" id="satnica" value="1200" min="0" inputmode="numeric" oninput="calc()"><span class="unit">RSD/h</span></div></div>
+    <div class="field-row"><div class="field-label">Sati rada</div><div class="input-wrap"><input type="number" id="sati" value="8" min="0" inputmode="numeric" oninput="calc()"><span class="unit">h</span></div></div>
+    <div class="field-row"><div><div class="field-label">Pomoćni radnik</div><div class="field-sub">11.750 RSD / dan</div></div><div class="input-wrap"><input type="number" id="pomocni" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">dana</span></div></div>
+    <div class="field-row"><div><div class="field-label">Udaljenost</div><div class="field-sub" id="km-hint">do 30km = besplatno</div></div><div class="input-wrap"><input type="number" id="km" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">km</span></div></div>
+    <div class="field-row"><div><div class="field-label">Sprat bez lifta</div><div class="field-sub">2.500 RSD / sprat</div></div><div class="input-wrap"><input type="number" id="sprat" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">sp.</span></div></div>
+    <div class="field-row"><div><div class="field-label">Dnevnica</div><div class="field-sub">6.000 RSD / dan</div></div><div class="input-wrap"><input type="number" id="dnevnica" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">dana</span></div></div>
+    <div class="field-row"><div class="field-label">Ostali troškovi</div><div class="input-wrap"><input type="number" id="ostali" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">RSD</span></div></div>
   </div>
-
   <div class="card">
     <div class="card-title">Marža i popust</div>
     <div class="slider-row">
@@ -128,7 +100,6 @@
       <div class="slider-hint">Smanjuje finalnu cenu i tvoju zaradu</div>
     </div>
   </div>
-
   <div class="card">
     <div class="card-title">Rezultat</div>
     <div class="metrics">
@@ -144,7 +115,6 @@
       <div class="br-row total"><span class="bl">Ukupna zarada</span><span class="bv" id="r-profit">0 RSD</span></div>
     </div>
   </div>
-
   <div class="card">
     <div class="card-title">Sačuvaj u evidenciju</div>
     <div class="save-inputs">
@@ -154,13 +124,11 @@
     <button class="save-btn" id="save-btn" onclick="saveToSheet()">Sačuvaj u Google Sheet</button>
     <div class="toast" id="toast"></div>
   </div>
-
 </div>
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhoOdI61UTqLgBOFZsUjan94nG2czkeLk0gbqBPJh-GS_6gdXo1tLZEHxQzZq5_bWq3Q/exec';
 const RABAT = 0.10;
-
 const DRVOLUX = [
   {sifra:'D152/18',   naziv:'Korpus Bela Kastamonu 18mm', tip:'Ploča',      jm:'m²', cena:1249},
   {sifra:'U12168/18', naziv:'Kasmir Grau 18mm',           tip:'Ploča',      jm:'m²', cena:1869},
@@ -171,133 +139,118 @@ const DRVOLUX = [
   {sifra:'AP23/2',    naziv:'Kantovanje ABS 23/2mm',      tip:'Usluga',     jm:'m',  cena:78},
   {sifra:'KP23/0.4',  naziv:'Kantovanje PVC 23/0.4mm',    tip:'Usluga',     jm:'m',  cena:45},
 ];
-
-function cr(c) { return Math.round(c * (1 - RABAT)); }
-function fmt(n) { return Math.round(n).toLocaleString('sr-RS') + ' RSD'; }
-function fmtN(n) { return Math.round(n).toLocaleString('sr-RS'); }
-
-let rows = [
-  {sifra:'D152/18', qty:5},
-  {sifra:'10482G',  qty:20},
-  {sifra:'AP23/2',  qty:20},
-];
-
-function buildSelect(sel) {
-  let o = '<option value="">— Odaberi —</option>';
-  let g = {};
-  DRVOLUX.forEach(x => { if(!g[x.tip]) g[x.tip]=[]; g[x.tip].push(x); });
-  Object.entries(g).forEach(([tip, items]) => {
-    o += `<optgroup label="${tip}">`;
-    items.forEach(x => {
-      o += `<option value="${x.sifra}"${x.sifra===sel?' selected':''}>${x.naziv} (${cr(x.cena).toLocaleString('sr-RS')}/${x.jm})</option>`;
-    });
-    o += '</optgroup>';
+function cr(c){return Math.round(c*(1-RABAT));}
+function fmt(n){return Math.round(n).toLocaleString('sr-RS')+' RSD';}
+function fmtN(n){return Math.round(n).toLocaleString('sr-RS');}
+let rows=[{sifra:'D152/18',qty:5},{sifra:'10482G',qty:20},{sifra:'AP23/2',qty:20}];
+function buildSelect(sel){
+  let o='<option value="">— Odaberi —</option>',g={};
+  DRVOLUX.forEach(x=>{if(!g[x.tip])g[x.tip]=[];g[x.tip].push(x);});
+  Object.entries(g).forEach(([tip,items])=>{
+    o+=`<optgroup label="${tip}">`;
+    items.forEach(x=>{o+=`<option value="${x.sifra}"${x.sifra===sel?' selected':''}>${x.naziv} (${cr(x.cena).toLocaleString('sr-RS')}/${x.jm})</option>`;});
+    o+='</optgroup>';
   });
   return o;
 }
-
-function renderRows() {
-  const el = document.getElementById('mat-list');
-  el.innerHTML = '';
-  rows.forEach((r, i) => {
-    const it = DRVOLUX.find(x => x.sifra === r.sifra);
-    const cena = it ? cr(it.cena) : 0;
-    const d = document.createElement('div');
-    d.className = 'mat-row';
-    d.innerHTML = `
-      <select onchange="rows[${i}].sifra=this.value;renderRows();">${buildSelect(r.sifra)}</select>
+function renderRows(){
+  const el=document.getElementById('mat-list');el.innerHTML='';
+  rows.forEach((r,i)=>{
+    const it=DRVOLUX.find(x=>x.sifra===r.sifra),cena=it?cr(it.cena):0;
+    const d=document.createElement('div');d.className='mat-row';
+    d.innerHTML=`<select onchange="rows[${i}].sifra=this.value;renderRows();">${buildSelect(r.sifra)}</select>
       <input type="number" value="${cena}" readonly style="opacity:0.5;">
       <input type="number" value="${r.qty}" min="0" step="0.01" inputmode="decimal" oninput="rows[${i}].qty=+this.value;calc()">
       <button class="del-btn" onclick="rows.splice(${i},1);renderRows();">×</button>`;
     el.appendChild(d);
-  });
-  calc();
+  });calc();
 }
-
-function addRow() { rows.push({sifra:'', qty:1}); renderRows(); }
-
-function getV() {
-  let matBase = 0;
-  rows.forEach(r => { const it = DRVOLUX.find(x => x.sifra === r.sifra); if(it) matBase += cr(it.cena) * r.qty; });
-  const marza    = +document.getElementById('marza').value / 100;
-  const popust   = +document.getElementById('popust').value / 100;
-  const satnica  = +document.getElementById('satnica').value || 1200;
-  const sati     = +document.getElementById('sati').value || 0;
-  const pomocni  = (+document.getElementById('pomocni').value || 0) * 11750;
-  const km       = +document.getElementById('km').value || 0;
-  const sprat    = (+document.getElementById('sprat').value || 0) * 2500;
-  const dnevnica = (+document.getElementById('dnevnica').value || 0) * 6000;
-  const ostali   = +document.getElementById('ostali').value || 0;
-  let gorivo = 0, kmHint = 'do 30km = besplatno';
-  if(km > 80)      { gorivo = km*2*20; kmHint = fmtN(gorivo)+' RSD (20/km)'; }
-  else if(km > 30) { gorivo = km*2*15; kmHint = fmtN(gorivo)+' RSD (15/km)'; }
-  else if(km > 0)  { kmHint = 'besplatno (do 30km)'; }
-  document.getElementById('km-hint').textContent = kmHint;
-  const matM = matBase*(1+marza), rad = satnica*sati+pomocni+gorivo+sprat+dnevnica+ostali;
-  const ukupno = matM+rad, final = ukupno*(1-popust), pi = ukupno-final;
-  const profit = matBase*marza+satnica*sati-pi;
-  return {matBase, matM, rad, ukupno, final, pi, profit, marza, popust, satnica, sati};
+function addRow(){rows.push({sifra:'',qty:1});renderRows();}
+function getV(){
+  let matBase=0;
+  rows.forEach(r=>{const it=DRVOLUX.find(x=>x.sifra===r.sifra);if(it)matBase+=cr(it.cena)*r.qty;});
+  const marza=+document.getElementById('marza').value/100;
+  const popust=+document.getElementById('popust').value/100;
+  const satnica=+document.getElementById('satnica').value||1200;
+  const sati=+document.getElementById('sati').value||0;
+  const pomocni=(+document.getElementById('pomocni').value||0)*11750;
+  const km=+document.getElementById('km').value||0;
+  const sprat=(+document.getElementById('sprat').value||0)*2500;
+  const dnevnica=(+document.getElementById('dnevnica').value||0)*6000;
+  const ostali=+document.getElementById('ostali').value||0;
+  let gorivo=0,kmHint='do 30km = besplatno';
+  if(km>80){gorivo=km*2*20;kmHint=fmtN(gorivo)+' RSD (20/km)';}
+  else if(km>30){gorivo=km*2*15;kmHint=fmtN(gorivo)+' RSD (15/km)';}
+  else if(km>0){kmHint='besplatno (do 30km)';}
+  document.getElementById('km-hint').textContent=kmHint;
+  const matM=matBase*(1+marza),rad=satnica*sati+pomocni+gorivo+sprat+dnevnica+ostali;
+  const ukupno=matM+rad,final=ukupno*(1-popust),pi=ukupno-final;
+  const profit=matBase*marza+satnica*sati-pi;
+  return{matBase,matM,rad,ukupno,final,pi,profit,marza,popust,satnica,sati};
 }
-
-function calc() {
-  const v = getV();
-  document.getElementById('r-mat').textContent     = fmtN(v.matM);
-  document.getElementById('r-rad').textContent     = fmtN(v.rad);
-  document.getElementById('r-ukupno').textContent  = fmtN(v.ukupno);
-  document.getElementById('r-final').textContent   = fmtN(v.final);
-  document.getElementById('r-zarada').textContent  = fmt(v.satnica*v.sati);
-  document.getElementById('r-mprofit').textContent = fmt(v.matBase*v.marza-v.pi);
-  document.getElementById('r-profit').textContent  = fmt(v.profit);
-  document.getElementById('r-eff').textContent     = v.sati>0 ? Math.round(v.profit/v.sati).toLocaleString('sr-RS')+' RSD/h' : '—';
+function calc(){
+  const v=getV();
+  document.getElementById('r-mat').textContent=fmtN(v.matM);
+  document.getElementById('r-rad').textContent=fmtN(v.rad);
+  document.getElementById('r-ukupno').textContent=fmtN(v.ukupno);
+  document.getElementById('r-final').textContent=fmtN(v.final);
+  document.getElementById('r-zarada').textContent=fmt(v.satnica*v.sati);
+  document.getElementById('r-mprofit').textContent=fmt(v.matBase*v.marza-v.pi);
+  document.getElementById('r-profit').textContent=fmt(v.profit);
+  document.getElementById('r-eff').textContent=v.sati>0?Math.round(v.profit/v.sati).toLocaleString('sr-RS')+' RSD/h':'—';
 }
+function showToast(msg,tip){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+tip;}
 
-function showToast(msg, tip) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast show '+tip;
-}
+async function saveToSheet(){
+  const ime=document.getElementById('ime-posla').value.trim();
+  const klijent=document.getElementById('ime-klijenta').value.trim();
+  if(!ime){showToast('Unesi naziv posla','err');return;}
+  const v=getV();
+  const btn=document.getElementById('save-btn');
+  btn.disabled=true;
+  showToast('Čuvam u sheet...','loading');
 
-function saveToSheet() {
-  const ime     = document.getElementById('ime-posla').value.trim();
-  const klijent = document.getElementById('ime-klijenta').value.trim();
-  if(!ime) { showToast('Unesi naziv posla', 'err'); return; }
-
-  const v = getV();
-  const btn = document.getElementById('save-btn');
-  btn.disabled = true;
-  showToast('Čuvam u sheet...', 'loading');
-
-  const payload = {
-    datum:         new Date().toLocaleDateString('sr-RS'),
-    posao:         ime,
-    klijent:       klijent || '—',
+  // Saljemo kao individualne URL parametre — bez JSON enkodiranja
+  const params = new URLSearchParams({
+    datum:    new Date().toLocaleDateString('sr-RS'),
+    posao:    ime,
+    klijent:  klijent||'—',
     mat_nabavna:   Math.round(v.matBase),
     mat_marza:     Math.round(v.matM),
-    rad_logistika: Math.round(v.rad),
-    ukupno_pre:    Math.round(v.ukupno),
-    finalna_cena:  Math.round(v.final),
+    rad:           Math.round(v.rad),
+    ukupno:        Math.round(v.ukupno),
+    finalna:       Math.round(v.final),
     zarada:        Math.round(v.profit),
-    marza_proc:    Math.round(v.marza*100)+'%',
-    status:        'Na čekanju',
+    marza:         Math.round(v.marza*100)+'%',
+    status:        'Na cekanju',
     napomena:      ''
-  };
+  });
 
-  // Koristimo iframe trick — jedini nacin koji zaobilazi CORS za Google Apps Script
-  const url = SCRIPT_URL + '?data=' + encodeURIComponent(JSON.stringify(payload));
-  const iframe = document.createElement('iframe');
-  iframe.style.display = 'none';
-  iframe.src = url;
-  document.body.appendChild(iframe);
+  const url = SCRIPT_URL + '?' + params.toString();
 
-  // Nakon 4 sekunde pretpostavljamo da je uspelo
-  setTimeout(() => {
-    document.body.removeChild(iframe);
-    showToast('Sačuvano u sheet! Provjeri Evidencija_Poslova_v2.', 'ok');
-    document.getElementById('ime-posla').value    = '';
-    document.getElementById('ime-klijenta').value = '';
-    btn.disabled = false;
-  }, 4000);
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    const data = await res.json();
+    if(data.success) {
+      showToast('Sačuvano u sheet!', 'ok');
+      document.getElementById('ime-posla').value='';
+      document.getElementById('ime-klijenta').value='';
+    } else {
+      showToast('Greška: '+data.greska, 'err');
+    }
+  } catch(err) {
+    // Pokusaj no-cors ako cors ne radi
+    try {
+      await fetch(url, { mode: 'no-cors' });
+      showToast('Sačuvano! Provjeri sheet.', 'ok');
+      document.getElementById('ime-posla').value='';
+      document.getElementById('ime-klijenta').value='';
+    } catch(e) {
+      showToast('Greška: '+e.message, 'err');
+    }
+  }
+  btn.disabled=false;
 }
-
 renderRows();
 </script>
 </body>
