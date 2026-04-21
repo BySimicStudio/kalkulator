@@ -6,216 +6,58 @@
 <title>Kalkulator — By Simic Studio</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #f0eeea;
-    color: #1a1a1a;
-    min-height: 100vh;
-    padding-bottom: 40px;
-  }
-
-  .topbar {
-    background: #fff;
-    border-bottom: 0.5px solid #e0e0e0;
-    padding: 14px 16px 12px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .topbar-left h1 { font-size: 16px; font-weight: 600; }
-  .topbar-left p { font-size: 12px; color: #888; margin-top: 1px; }
-  .status-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #1D9E75;
-  }
-
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0eeea; color: #1a1a1a; min-height: 100vh; padding-bottom: 40px; }
+  .topbar { background: #fff; border-bottom: 0.5px solid #e0e0e0; padding: 14px 16px 12px; position: sticky; top: 0; z-index: 100; }
+  .topbar h1 { font-size: 16px; font-weight: 600; }
+  .topbar p { font-size: 12px; color: #888; margin-top: 1px; }
   .page { padding: 12px 14px; }
-
-  .card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 10px;
-    border: 0.5px solid #eee;
-  }
-
-  .card-title {
-    font-size: 11px;
-    font-weight: 600;
-    color: #aaa;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    margin-bottom: 14px;
-  }
-
-  /* Materijal */
-  .mat-header {
-    display: grid;
-    grid-template-columns: 1fr 68px 56px 32px;
-    gap: 5px;
-    margin-bottom: 6px;
-  }
+  .card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 10px; border: 0.5px solid #eee; }
+  .card-title { font-size: 11px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; }
+  .mat-header { display: grid; grid-template-columns: 1fr 68px 56px 32px; gap: 5px; margin-bottom: 6px; }
   .mat-header span { font-size: 11px; color: #ccc; }
-  .mat-header span:nth-child(2),
-  .mat-header span:nth-child(3) { text-align: right; }
-
-  .mat-row {
-    display: grid;
-    grid-template-columns: 1fr 68px 56px 32px;
-    gap: 5px;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  .mat-row select,
-  .mat-row input[type=number] {
-    width: 100%;
-    font-size: 12px;
-    padding: 9px 7px;
-    border: 0.5px solid #e8e8e8;
-    border-radius: 10px;
-    background: #f8f8f6;
-    color: #1a1a1a;
-    -webkit-appearance: none;
-    appearance: none;
-  }
+  .mat-header span:nth-child(2), .mat-header span:nth-child(3) { text-align: right; }
+  .mat-row { display: grid; grid-template-columns: 1fr 68px 56px 32px; gap: 5px; align-items: center; margin-bottom: 8px; }
+  .mat-row select, .mat-row input[type=number] { width: 100%; font-size: 12px; padding: 9px 7px; border: 0.5px solid #e8e8e8; border-radius: 10px; background: #f8f8f6; color: #1a1a1a; -webkit-appearance: none; appearance: none; }
   .mat-row input[type=number] { text-align: right; }
-  .del-btn {
-    background: none; border: none;
-    color: #ddd; font-size: 20px;
-    cursor: pointer; padding: 0;
-    height: 36px; display: flex;
-    align-items: center; justify-content: center;
-  }
+  .del-btn { background: none; border: none; color: #ddd; font-size: 20px; cursor: pointer; padding: 0; height: 36px; display: flex; align-items: center; justify-content: center; }
   .del-btn:active { color: #e74c3c; }
-
-  .add-btn {
-    font-size: 13px; color: #1D9E75;
-    background: none;
-    border: 0.5px solid #1D9E75;
-    border-radius: 10px;
-    padding: 9px 14px;
-    cursor: pointer;
-    width: 100%;
-    margin-top: 2px;
-  }
-  .rabat-note {
-    font-size: 11px; color: #ccc;
-    margin-top: 8px; text-align: center;
-  }
-
-  /* Field rows */
-  .field-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 0.5px solid #f5f5f5;
-  }
+  .add-btn { font-size: 13px; color: #1D9E75; background: none; border: 0.5px solid #1D9E75; border-radius: 10px; padding: 9px 14px; cursor: pointer; width: 100%; margin-top: 2px; }
+  .rabat-note { font-size: 11px; color: #ccc; margin-top: 8px; text-align: center; }
+  .field-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 0.5px solid #f5f5f5; }
   .field-row:last-child { border-bottom: none; }
   .field-label { font-size: 14px; color: #444; flex: 1; }
   .field-sub { font-size: 11px; color: #bbb; margin-top: 1px; }
   .input-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-  .field-row input[type=number] {
-    width: 88px;
-    font-size: 15px; font-weight: 500;
-    padding: 8px 10px;
-    border: 0.5px solid #e8e8e8;
-    border-radius: 10px;
-    background: #f8f8f6;
-    color: #1a1a1a;
-    text-align: right;
-    -webkit-appearance: none;
-  }
+  .field-row input[type=number] { width: 88px; font-size: 15px; font-weight: 500; padding: 8px 10px; border: 0.5px solid #e8e8e8; border-radius: 10px; background: #f8f8f6; color: #1a1a1a; text-align: right; -webkit-appearance: none; }
   .unit { font-size: 12px; color: #bbb; }
-
-  /* Sliders */
-  .slider-row {
-    padding: 12px 0;
-    border-bottom: 0.5px solid #f5f5f5;
-  }
+  .slider-row { padding: 12px 0; border-bottom: 0.5px solid #f5f5f5; }
   .slider-row:last-child { border-bottom: none; }
-  .slider-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  }
+  .slider-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .slider-top label { font-size: 14px; color: #444; }
   .slider-val { font-size: 20px; font-weight: 700; color: #1a1a1a; }
-  input[type=range] {
-    width: 100%; height: 5px;
-    accent-color: #0F6E56;
-    cursor: pointer;
-  }
+  input[type=range] { width: 100%; height: 5px; accent-color: #0F6E56; cursor: pointer; }
   .slider-hint { font-size: 11px; color: #ccc; margin-top: 5px; }
-
-  /* Metrics */
-  .metrics {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-  .metric {
-    background: #f8f8f6;
-    border-radius: 12px;
-    padding: 12px;
-  }
+  .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .metric { background: #f8f8f6; border-radius: 12px; padding: 12px; }
   .metric.accent { background: #E1F5EE; }
   .metric .ml { font-size: 11px; color: #999; margin-bottom: 4px; line-height: 1.3; min-height: 28px; }
   .metric .mv { font-size: 17px; font-weight: 700; color: #1a1a1a; }
   .metric.accent .mv { color: #0F6E56; }
-
-  /* Breakdown */
   .breakdown { border-top: 0.5px solid #f0f0f0; padding-top: 12px; }
-  .br-row {
-    display: flex; justify-content: space-between;
-    align-items: center; padding: 9px 0;
-    border-bottom: 0.5px solid #f8f8f8;
-  }
+  .br-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 0.5px solid #f8f8f8; }
   .br-row:last-child { border-bottom: none; }
   .br-row .bl { font-size: 13px; color: #777; }
   .br-row .bv { font-size: 14px; font-weight: 600; color: #1a1a1a; }
-  .br-row.total {
-    border-top: 1px solid #eee;
-    padding-top: 14px; margin-top: 4px;
-  }
+  .br-row.total { border-top: 1px solid #eee; padding-top: 14px; margin-top: 4px; }
   .br-row.total .bl { font-size: 15px; font-weight: 600; color: #1a1a1a; }
   .br-row.total .bv { font-size: 24px; font-weight: 700; color: #0F6E56; }
-
-  /* Save */
   .save-inputs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-  .save-inputs input[type=text] {
-    width: 100%; font-size: 15px;
-    padding: 13px 14px;
-    border: 0.5px solid #e8e8e8;
-    border-radius: 12px;
-    background: #f8f8f6;
-    color: #1a1a1a;
-  }
+  .save-inputs input[type=text] { width: 100%; font-size: 15px; padding: 13px 14px; border: 0.5px solid #e8e8e8; border-radius: 12px; background: #f8f8f6; color: #1a1a1a; }
   .save-inputs input[type=text]::placeholder { color: #ccc; }
-
-  .save-btn {
-    width: 100%; padding: 16px;
-    background: #0F6E56; color: #fff;
-    font-size: 16px; font-weight: 600;
-    border: none; border-radius: 14px;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
+  .save-btn { width: 100%; padding: 16px; background: #0F6E56; color: #fff; font-size: 16px; font-weight: 600; border: none; border-radius: 14px; cursor: pointer; }
   .save-btn:active { background: #085041; }
   .save-btn:disabled { background: #aaa; cursor: not-allowed; }
-
-  .toast {
-    margin-top: 10px; padding: 12px 14px;
-    border-radius: 12px; font-size: 14px;
-    font-weight: 500; text-align: center;
-    display: none;
-  }
+  .toast { margin-top: 12px; padding: 13px 14px; border-radius: 12px; font-size: 14px; font-weight: 500; text-align: center; display: none; }
   .toast.show { display: block; }
   .toast.ok { background: #E1F5EE; color: #0F6E56; }
   .toast.err { background: #FCEBEB; color: #A32D2D; }
@@ -225,191 +67,98 @@
 <body>
 
 <div class="topbar">
-  <div class="topbar-left">
-    <h1>By Simic Studio</h1>
-    <p>Kalkulator nameštaja po meri</p>
-  </div>
-  <div class="status-dot" id="status-dot"></div>
+  <h1>By Simic Studio</h1>
+  <p>Kalkulator nameštaja po meri</p>
 </div>
 
 <div class="page">
 
-  <!-- MATERIJAL -->
   <div class="card">
     <div class="card-title">Materijal — DrvoLux</div>
     <div class="mat-header">
-      <span>Artikal</span>
-      <span>Cena</span>
-      <span>Kol.</span>
-      <span></span>
+      <span>Artikal</span><span>Cena</span><span>Kol.</span><span></span>
     </div>
     <div id="mat-list"></div>
     <button class="add-btn" onclick="addRow()">+ Dodaj artikal</button>
-    <div class="rabat-note">Cene prikazane sa 10% rabatom (već oduzeto)</div>
+    <div class="rabat-note">Cene sa 10% rabatom već oduzet</div>
   </div>
 
-  <!-- RAD -->
   <div class="card">
     <div class="card-title">Rad i logistika</div>
-
     <div class="field-row">
-      <div>
-        <div class="field-label">Satnica</div>
-      </div>
-      <div class="input-wrap">
-        <input type="number" id="satnica" value="1200" min="0" inputmode="numeric" oninput="calc()">
-        <span class="unit">RSD/h</span>
-      </div>
+      <div class="field-label">Satnica</div>
+      <div class="input-wrap"><input type="number" id="satnica" value="1200" min="0" inputmode="numeric" oninput="calc()"><span class="unit">RSD/h</span></div>
     </div>
-
     <div class="field-row">
       <div class="field-label">Sati rada</div>
-      <div class="input-wrap">
-        <input type="number" id="sati" value="8" min="0" inputmode="numeric" oninput="calc()">
-        <span class="unit">h</span>
-      </div>
+      <div class="input-wrap"><input type="number" id="sati" value="8" min="0" inputmode="numeric" oninput="calc()"><span class="unit">h</span></div>
     </div>
-
     <div class="field-row">
-      <div>
-        <div class="field-label">Pomoćni radnik</div>
-        <div class="field-sub">11.750 RSD / dan</div>
-      </div>
-      <div class="input-wrap">
-        <input type="number" id="pomocni" value="0" min="0" inputmode="numeric" oninput="calc()">
-        <span class="unit">dana</span>
-      </div>
+      <div><div class="field-label">Pomoćni radnik</div><div class="field-sub">11.750 RSD / dan</div></div>
+      <div class="input-wrap"><input type="number" id="pomocni" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">dana</span></div>
     </div>
-
     <div class="field-row">
-      <div>
-        <div class="field-label">Udaljenost</div>
-        <div class="field-sub" id="km-hint">do 30km = besplatno</div>
-      </div>
-      <div class="input-wrap">
-        <input type="number" id="km" value="0" min="0" inputmode="numeric" oninput="calc()">
-        <span class="unit">km</span>
-      </div>
+      <div><div class="field-label">Udaljenost</div><div class="field-sub" id="km-hint">do 30km = besplatno</div></div>
+      <div class="input-wrap"><input type="number" id="km" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">km</span></div>
     </div>
-
     <div class="field-row">
-      <div>
-        <div class="field-label">Sprat bez lifta</div>
-        <div class="field-sub">2.500 RSD / sprat</div>
-      </div>
-      <div class="input-wrap">
-        <input type="number" id="sprat" value="0" min="0" inputmode="numeric" oninput="calc()">
-        <span class="unit">sp.</span>
-      </div>
+      <div><div class="field-label">Sprat bez lifta</div><div class="field-sub">2.500 RSD / sprat</div></div>
+      <div class="input-wrap"><input type="number" id="sprat" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">sp.</span></div>
     </div>
-
     <div class="field-row">
-      <div>
-        <div class="field-label">Dnevnica</div>
-        <div class="field-sub">6.000 RSD / dan</div>
-      </div>
-      <div class="input-wrap">
-        <input type="number" id="dnevnica" value="0" min="0" inputmode="numeric" oninput="calc()">
-        <span class="unit">dana</span>
-      </div>
+      <div><div class="field-label">Dnevnica</div><div class="field-sub">6.000 RSD / dan</div></div>
+      <div class="input-wrap"><input type="number" id="dnevnica" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">dana</span></div>
     </div>
-
     <div class="field-row">
       <div class="field-label">Ostali troškovi</div>
-      <div class="input-wrap">
-        <input type="number" id="ostali" value="0" min="0" inputmode="numeric" oninput="calc()">
-        <span class="unit">RSD</span>
-      </div>
+      <div class="input-wrap"><input type="number" id="ostali" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">RSD</span></div>
     </div>
   </div>
 
-  <!-- MARZA -->
   <div class="card">
     <div class="card-title">Marža i popust</div>
-
     <div class="slider-row">
-      <div class="slider-top">
-        <label>Marža na materijal</label>
-        <span class="slider-val" id="mOut">25%</span>
-      </div>
-      <input type="range" min="0" max="80" step="1" value="25" id="marza"
-             oninput="mOut.textContent=this.value+'%';calc()">
+      <div class="slider-top"><label>Marža na materijal</label><span class="slider-val" id="mOut">25%</span></div>
+      <input type="range" min="0" max="80" step="1" value="25" id="marza" oninput="mOut.textContent=this.value+'%';calc()">
       <div class="slider-hint">Dodaješ ovaj % na nabavnu cenu materijala</div>
     </div>
-
     <div class="slider-row">
-      <div class="slider-top">
-        <label>Popust klijentu</label>
-        <span class="slider-val" id="pOut">0%</span>
-      </div>
-      <input type="range" min="0" max="30" step="1" value="0" id="popust"
-             oninput="pOut.textContent=this.value+'%';calc()">
+      <div class="slider-top"><label>Popust klijentu</label><span class="slider-val" id="pOut">0%</span></div>
+      <input type="range" min="0" max="30" step="1" value="0" id="popust" oninput="pOut.textContent=this.value+'%';calc()">
       <div class="slider-hint">Smanjuje finalnu cenu i tvoju zaradu</div>
     </div>
   </div>
 
-  <!-- REZULTAT -->
   <div class="card">
     <div class="card-title">Rezultat</div>
-
     <div class="metrics">
-      <div class="metric">
-        <div class="ml">Materijal sa maržom</div>
-        <div class="mv" id="r-mat">0</div>
-      </div>
-      <div class="metric">
-        <div class="ml">Rad i logistika</div>
-        <div class="mv" id="r-rad">0</div>
-      </div>
-      <div class="metric">
-        <div class="ml">Pre popusta</div>
-        <div class="mv" id="r-ukupno">0</div>
-      </div>
-      <div class="metric accent">
-        <div class="ml">Finalna cena za klijenta</div>
-        <div class="mv" id="r-final">0</div>
-      </div>
+      <div class="metric"><div class="ml">Materijal sa maržom</div><div class="mv" id="r-mat">0</div></div>
+      <div class="metric"><div class="ml">Rad i logistika</div><div class="mv" id="r-rad">0</div></div>
+      <div class="metric"><div class="ml">Pre popusta</div><div class="mv" id="r-ukupno">0</div></div>
+      <div class="metric accent"><div class="ml">Finalna cena za klijenta</div><div class="mv" id="r-final">0</div></div>
     </div>
-
     <div class="breakdown">
-      <div class="br-row">
-        <span class="bl">Zarada na radu</span>
-        <span class="bv" id="r-zarada">0 RSD</span>
-      </div>
-      <div class="br-row">
-        <span class="bl">Zarada na materijalu</span>
-        <span class="bv" id="r-mprofit">0 RSD</span>
-      </div>
-      <div class="br-row">
-        <span class="bl">Efektivna satnica</span>
-        <span class="bv" id="r-eff">—</span>
-      </div>
-      <div class="br-row total">
-        <span class="bl">Ukupna zarada</span>
-        <span class="bv" id="r-profit">0 RSD</span>
-      </div>
+      <div class="br-row"><span class="bl">Zarada na radu</span><span class="bv" id="r-zarada">0 RSD</span></div>
+      <div class="br-row"><span class="bl">Zarada na materijalu</span><span class="bv" id="r-mprofit">0 RSD</span></div>
+      <div class="br-row"><span class="bl">Efektivna satnica</span><span class="bv" id="r-eff">—</span></div>
+      <div class="br-row total"><span class="bl">Ukupna zarada</span><span class="bv" id="r-profit">0 RSD</span></div>
     </div>
   </div>
 
-  <!-- SACUVAJ -->
   <div class="card">
     <div class="card-title">Sačuvaj u evidenciju</div>
     <div class="save-inputs">
       <input type="text" id="ime-posla" placeholder="Naziv posla (npr. Kuhinja Zemun)">
       <input type="text" id="ime-klijenta" placeholder="Ime klijenta">
     </div>
-    <button class="save-btn" id="save-btn" onclick="saveToSheet()">
-      Sačuvaj u Google Sheet
-    </button>
+    <button class="save-btn" id="save-btn" onclick="saveToSheet()">Sačuvaj u Google Sheet</button>
     <div class="toast" id="toast"></div>
   </div>
 
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5ATGJVmJuDGGtOQPXfshUwsxF8YUQbxP5_a8zvbyfkNkyRDJVRUMLBPK-upIaTvlS/exec';
-const SHEET_URL  = 'https://docs.google.com/spreadsheets/d/1TYuSEyBY6C0112El4Izo1XtfCLKq5243i-tht5Zr7AU/edit';
-const KLIJENTI_FOLDER = '1lRIv3icmzvs9ImgDbVd30A_PFoRZb1xr';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhoOdI61UTqLgBOFZsUjan94nG2czkeLk0gbqBPJh-GS_6gdXo1tLZEHxQzZq5_bWq3Q/exec';
 const RABAT = 0.10;
 
 const DRVOLUX = [
@@ -458,8 +207,7 @@ function renderRows() {
     d.innerHTML = `
       <select onchange="rows[${i}].sifra=this.value;renderRows();">${buildSelect(r.sifra)}</select>
       <input type="number" value="${cena}" readonly style="opacity:0.5;">
-      <input type="number" value="${r.qty}" min="0" step="0.01" inputmode="decimal"
-             oninput="rows[${i}].qty=+this.value;calc()">
+      <input type="number" value="${r.qty}" min="0" step="0.01" inputmode="decimal" oninput="rows[${i}].qty=+this.value;calc()">
       <button class="del-btn" onclick="rows.splice(${i},1);renderRows();">×</button>`;
     el.appendChild(d);
   });
@@ -470,11 +218,7 @@ function addRow() { rows.push({sifra:'', qty:1}); renderRows(); }
 
 function getV() {
   let matBase = 0;
-  rows.forEach(r => {
-    const it = DRVOLUX.find(x => x.sifra === r.sifra);
-    if(it) matBase += cr(it.cena) * r.qty;
-  });
-
+  rows.forEach(r => { const it = DRVOLUX.find(x => x.sifra === r.sifra); if(it) matBase += cr(it.cena) * r.qty; });
   const marza    = +document.getElementById('marza').value / 100;
   const popust   = +document.getElementById('popust').value / 100;
   const satnica  = +document.getElementById('satnica').value || 1200;
@@ -484,84 +228,63 @@ function getV() {
   const sprat    = (+document.getElementById('sprat').value || 0) * 2500;
   const dnevnica = (+document.getElementById('dnevnica').value || 0) * 6000;
   const ostali   = +document.getElementById('ostali').value || 0;
-
-  let gorivo = 0;
-  let kmHint = 'do 30km = besplatno';
-  if(km > 80)      { gorivo = km*2*20; kmHint = fmtN(gorivo) + ' RSD (20/km, povratno)'; }
-  else if(km > 30) { gorivo = km*2*15; kmHint = fmtN(gorivo) + ' RSD (15/km, povratno)'; }
+  let gorivo = 0, kmHint = 'do 30km = besplatno';
+  if(km > 80)      { gorivo = km*2*20; kmHint = fmtN(gorivo)+' RSD (20/km)'; }
+  else if(km > 30) { gorivo = km*2*15; kmHint = fmtN(gorivo)+' RSD (15/km)'; }
   else if(km > 0)  { kmHint = 'besplatno (do 30km)'; }
   document.getElementById('km-hint').textContent = kmHint;
-
-  const matM   = matBase * (1 + marza);
-  const rad    = satnica*sati + pomocni + gorivo + sprat + dnevnica + ostali;
-  const ukupno = matM + rad;
-  const final  = ukupno * (1 - popust);
-  const pi     = ukupno - final;
-  const profit = matBase*marza + satnica*sati - pi;
-
+  const matM = matBase*(1+marza), rad = satnica*sati+pomocni+gorivo+sprat+dnevnica+ostali;
+  const ukupno = matM+rad, final = ukupno*(1-popust), pi = ukupno-final;
+  const profit = matBase*marza+satnica*sati-pi;
   return {matBase, matM, rad, ukupno, final, pi, profit, marza, popust, satnica, sati};
 }
 
 function calc() {
   const v = getV();
-  document.getElementById('r-mat').textContent    = fmtN(v.matM);
-  document.getElementById('r-rad').textContent    = fmtN(v.rad);
-  document.getElementById('r-ukupno').textContent = fmtN(v.ukupno);
-  document.getElementById('r-final').textContent  = fmtN(v.final);
-  document.getElementById('r-zarada').textContent = fmt(v.satnica * v.sati);
-  document.getElementById('r-mprofit').textContent= fmt(v.matBase * v.marza - v.pi);
-  document.getElementById('r-profit').textContent = fmt(v.profit);
-  document.getElementById('r-eff').textContent    = v.sati > 0
-    ? Math.round(v.profit/v.sati).toLocaleString('sr-RS') + ' RSD/h' : '—';
+  document.getElementById('r-mat').textContent     = fmtN(v.matM);
+  document.getElementById('r-rad').textContent     = fmtN(v.rad);
+  document.getElementById('r-ukupno').textContent  = fmtN(v.ukupno);
+  document.getElementById('r-final').textContent   = fmtN(v.final);
+  document.getElementById('r-zarada').textContent  = fmt(v.satnica*v.sati);
+  document.getElementById('r-mprofit').textContent = fmt(v.matBase*v.marza-v.pi);
+  document.getElementById('r-profit').textContent  = fmt(v.profit);
+  document.getElementById('r-eff').textContent     = v.sati>0 ? Math.round(v.profit/v.sati).toLocaleString('sr-RS')+' RSD/h' : '—';
 }
 
 function showToast(msg, tip) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show ' + tip;
+  t.textContent = msg; t.className = 'toast show '+tip;
 }
 
 async function saveToSheet() {
   const ime     = document.getElementById('ime-posla').value.trim();
   const klijent = document.getElementById('ime-klijenta').value.trim();
   if(!ime) { showToast('Unesi naziv posla', 'err'); return; }
-
-  const v     = getV();
-  const danas = new Date().toLocaleDateString('sr-RS');
-  const god   = new Date().getFullYear();
-  const mes   = String(new Date().getMonth()+1).padStart(2,'0');
-
+  const v = getV();
   const btn = document.getElementById('save-btn');
   btn.disabled = true;
   showToast('Čuvam u sheet...', 'loading');
-
   const payload = {
-    datum:         danas,
-    posao:         ime,
-    klijent:       klijent || '—',
+    datum: new Date().toLocaleDateString('sr-RS'),
+    posao: ime, klijent: klijent||'—',
     mat_nabavna:   Math.round(v.matBase),
     mat_marza:     Math.round(v.matM),
     rad_logistika: Math.round(v.rad),
     ukupno_pre:    Math.round(v.ukupno),
     finalna_cena:  Math.round(v.final),
     zarada:        Math.round(v.profit),
-    marza_proc:    Math.round(v.marza*100) + '%',
-    status:        'Na čekanju',
-    napomena:      ''
+    marza_proc:    Math.round(v.marza*100)+'%',
+    status: 'Na čekanju', napomena: ''
   };
-
   try {
     const url = SCRIPT_URL + '?data=' + encodeURIComponent(JSON.stringify(payload));
     await fetch(url, { mode: 'no-cors' });
-
-    showToast('Sačuvano u sheet!', 'ok');
-    document.getElementById('ime-posla').value   = '';
+    showToast('Sačuvano!', 'ok');
+    document.getElementById('ime-posla').value    = '';
     document.getElementById('ime-klijenta').value = '';
-
   } catch(err) {
-    showToast('Greška: ' + err.message, 'err');
+    showToast('Greška: '+err.message, 'err');
   }
-
   btn.disabled = false;
 }
 
