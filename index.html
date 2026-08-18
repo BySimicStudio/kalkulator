@@ -44,8 +44,8 @@
 
     <nav class="nav">
       <button class="nav-item" data-strana="projekti">Projekti</button>
-      <button class="nav-item" data-strana="materijali">Materijali <span class="nav-tag">FAZA 1</span></button>
-      <button class="nav-item" data-strana="okovi">Okovi <span class="nav-tag">FAZA 1</span></button>
+      <button class="nav-item" data-strana="materijali">Materijali</button>
+      <button class="nav-item" data-strana="okovi">Okovi</button>
       <button class="nav-item" data-strana="klijenti">Klijenti <span class="nav-tag">FAZA 5</span></button>
       <button class="nav-item" data-strana="ponude">Ponude <span class="nav-tag">FAZA 5</span></button>
       <button class="nav-item" data-strana="podesavanja">Podešavanja</button>
@@ -101,18 +101,95 @@
 
       <!-- ---------- MATERIJALI ---------- -->
       <section class="view" id="view-materijali" style="display:none">
-        <div class="empty">
-          <h3>Šifarnik materijala — Faza 1</h3>
-          <p>Ovde ulaze ploče i kant trake sa cenom po m² i po metru, pa konfiguracije koje jednim izborom popune sav materijal na elementu.</p>
+
+        <div class="kota"><span class="kota-line"></span><span class="kota-label">Ploče i kant trake</span><span class="kota-line"></span></div>
+        <div class="alatka">
+          <div class="filteri">
+            <button class="cip active" data-filter="sve">Sve</button>
+            <button class="cip" data-filter="ploca">Ploče</button>
+            <button class="cip" data-filter="kant">Kant trake</button>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" id="mat-seed">Ubaci DrvoLux cenovnik</button>
+            <button class="btn btn-primary btn-sm" id="mat-novi">Novi materijal</button>
+          </div>
         </div>
+
+        <div class="empty" id="mat-prazno">
+          <h3>Nema materijala</h3>
+          <p>Ubaci šest stavki sa tvojih DrvoLux računa jednim klikom, pa dopuni ostalo ručno. Kod kant traka cena je traka plus kantovanje zajedno — tako to i oni računaju.</p>
+        </div>
+
+        <div class="tabela-okvir" id="mat-tabela-okvir" style="display:none">
+          <div class="tabela-skrol">
+            <table class="tab">
+              <thead><tr>
+                <th>Naziv</th><th>Vrsta</th><th class="r">Cena</th>
+                <th>Debljina</th><th>Ploča</th><th></th>
+              </tr></thead>
+              <tbody id="mat-telo"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style="height:26px"></div>
+
+        <div class="kota"><span class="kota-line"></span><span class="kota-label">Konfiguracije</span><span class="kota-line"></span></div>
+        <div class="alatka">
+          <div style="font-size:13px;color:var(--ink-2);max-width:520px">
+            Imenovani set materijala. Na elementu izabereš jednu konfiguraciju i sva polja materijala se popune odjednom.
+          </div>
+          <button class="btn btn-primary btn-sm" id="kon-nova">Nova konfiguracija</button>
+        </div>
+
+        <div class="empty" id="kon-prazno">
+          <h3>Nema konfiguracija</h3>
+          <p>Napravi jednu po tipu posla — na primer „Kuhinja bela” ili „Plakar kasmir” — pa je posle biraš jednim klikom.</p>
+        </div>
+
+        <div class="tabela-okvir" id="kon-tabela-okvir" style="display:none">
+          <div class="tabela-skrol">
+            <table class="tab">
+              <thead><tr>
+                <th>Naziv</th><th>Korpus</th><th>Krila</th><th>Kant korpus</th><th></th>
+              </tr></thead>
+              <tbody id="kon-telo"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="poruka" id="sif-poruka"></div>
       </section>
 
       <!-- ---------- OKOVI ---------- -->
       <section class="view" id="view-okovi" style="display:none">
-        <div class="empty">
-          <h3>Šifarnik okova — Faza 1</h3>
-          <p>Šarke, klizači, nosači i nogice sa cenom po komadu. Šarke i nosači se posle računaju sami iz broja krila i polica.</p>
+        <div class="alatka">
+          <div style="font-size:13px;color:var(--ink-2);max-width:520px">
+            Šarke, nosači polica i nogice označeni kao automatski sabiraju se sami iz elemenata na projektu. Ostalo dodaješ ručno.
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" id="okov-seed">Ubaci strukturu</button>
+            <button class="btn btn-primary btn-sm" id="okov-novi">Novi okov</button>
+          </div>
         </div>
+
+        <div class="empty" id="okov-prazno">
+          <h3>Nema okova</h3>
+          <p>Ubaci gotovu strukturu sa GTV šarkama, klizačima i nosačima, pa upiši cene koje dobiješ na Bežanijskoj kosi.</p>
+        </div>
+
+        <div class="tabela-okvir" id="okov-tabela-okvir" style="display:none">
+          <div class="tabela-skrol">
+            <table class="tab">
+              <thead><tr>
+                <th>Naziv</th><th>Kategorija</th><th class="r">Cena</th><th>Auto</th><th></th>
+              </tr></thead>
+              <tbody id="okov-telo"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style="font-size:12px;color:var(--alert);margin-top:10px" id="okov-info"></div>
       </section>
 
       <!-- ---------- KLIJENTI ---------- -->
@@ -236,6 +313,21 @@
     <button class="mob-item" data-strana="okovi">Okovi</button>
     <button class="mob-item" data-strana="podesavanja">Podešavanja</button>
   </nav>
+</div>
+
+<!-- ================= MODAL ================= -->
+<div class="modal-sloj" id="modal-sloj">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-naslov">
+    <div class="modal-glava">
+      <h2 id="modal-naslov"></h2>
+      <button class="zatvori" id="modal-zatvori" aria-label="Zatvori">&times;</button>
+    </div>
+    <div class="modal-telo" id="modal-telo"></div>
+    <div class="modal-noga">
+      <button class="btn" id="modal-otkazi">Otkaži</button>
+      <button class="btn btn-primary" id="modal-snimi">Sačuvaj</button>
+    </div>
+  </div>
 </div>
 
 <script type="module" src="js/app.js"></script>
