@@ -44,6 +44,7 @@
 
     <nav class="nav">
       <button class="nav-item" data-strana="projekti">Projekti</button>
+      <button class="nav-item" data-strana="element">Element</button>
       <button class="nav-item" data-strana="materijali">Materijali</button>
       <button class="nav-item" data-strana="okovi">Okovi</button>
       <button class="nav-item" data-strana="klijenti">Klijenti <span class="nav-tag">FAZA 5</span></button>
@@ -96,6 +97,157 @@
         <div class="empty" style="margin-top:14px">
           <h3>Projekti stižu u Fazi 2</h3>
           <p>Prvo ide motor koji iz dimenzija elementa sam izvuče delove, kvadraturu i okove. Bez njega projekat nema šta da sabira.</p>
+        </div>
+      </section>
+
+      <!-- ---------- ELEMENT ---------- -->
+      <section class="view" id="view-element" style="display:none">
+        <div class="el-mreza">
+
+          <div class="el-levo">
+            <div class="card">
+              <div class="kota"><span class="kota-line"></span><span class="kota-label">Osnova</span><span class="kota-line"></span></div>
+
+              <div class="field">
+                <label for="e-konfiguracija">Konfiguracija materijala</label>
+                <select id="e-konfiguracija"></select>
+              </div>
+
+              <div class="field">
+                <label>Tip spoja</label>
+                <div class="izbor">
+                  <label><input type="radio" name="tip-spoja" value="1" checked><span>Tip 1 — dno ulazi između bočnih</span></label>
+                  <label><input type="radio" name="tip-spoja" value="2"><span>Tip 2 — bočne naležu na dno</span></label>
+                </div>
+              </div>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label for="e-visina">Visina (mm)</label>
+                  <input type="number" id="e-visina" value="800" min="1">
+                </div>
+                <div class="field">
+                  <label for="e-sirina">Širina (mm)</label>
+                  <input type="number" id="e-sirina" value="600" min="1">
+                </div>
+              </div>
+              <div class="field-grid">
+                <div class="field">
+                  <label for="e-dubina">Dubina (mm)</label>
+                  <input type="number" id="e-dubina" value="400" min="1">
+                </div>
+                <div class="field">
+                  <label for="e-debljina">Debljina ploče (mm)</label>
+                  <input type="number" id="e-debljina" value="18" min="1">
+                </div>
+              </div>
+              <div class="field" style="max-width:calc(50% - 6px)">
+                <label for="e-broj">Broj istih elemenata</label>
+                <input type="number" id="e-broj" value="1" min="1">
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="kota"><span class="kota-line"></span><span class="kota-label">Gore</span><span class="kota-line"></span></div>
+              <div class="izbor tri">
+                <label><input type="radio" name="plafon" value="bez"><span>Bez</span></label>
+                <label><input type="radio" name="plafon" value="plafon" checked><span>Plafon</span></label>
+                <label><input type="radio" name="plafon" value="vezovi"><span>Vezovi</span></label>
+              </div>
+              <div class="field" style="max-width:calc(50% - 6px);margin-top:12px">
+                <label for="e-vez-sirina">Širina veza (mm)</label>
+                <input type="number" id="e-vez-sirina" value="80" min="1">
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="kota"><span class="kota-line"></span><span class="kota-label">Police</span><span class="kota-line"></span></div>
+              <div class="field-grid">
+                <div class="field">
+                  <label for="e-police">Broj polica</label>
+                  <input type="number" id="e-police" value="0" min="0">
+                </div>
+                <div class="field">
+                  <label for="e-polica-dubina">Dubina police (mm)</label>
+                  <input type="number" id="e-polica-dubina" value="0" min="0">
+                  <div class="hint">0 = dubina elementa minus uvlačenje</div>
+                </div>
+              </div>
+              <div class="field-grid">
+                <div class="field">
+                  <label for="e-polica-uvlacenje">Uvlačenje police (mm)</label>
+                  <input type="number" id="e-polica-uvlacenje" value="10" min="0">
+                </div>
+                <div class="field">
+                  <label for="e-polica-zazor">Zazor police po širini (mm)</label>
+                  <input type="number" id="e-polica-zazor" value="1" min="0" step="0.5">
+                  <div class="hint">Ukupno, ne po strani</div>
+                </div>
+              </div>
+              <label class="prekidac"><input type="checkbox" id="e-polica-fiksna"> Fiksna polica — bez nosača</label>
+            </div>
+
+            <div class="card">
+              <div class="kota"><span class="kota-line"></span><span class="kota-label">Krila i leđa</span><span class="kota-line"></span></div>
+              <div class="izbor tri">
+                <label><input type="radio" name="krilo" value="bez" checked><span>Bez krila</span></label>
+                <label><input type="radio" name="krilo" value="jednodelno"><span>Jednodelno</span></label>
+                <label><input type="radio" name="krilo" value="dvodelno"><span>Dvodelno</span></label>
+              </div>
+              <div class="field" style="max-width:calc(50% - 6px);margin-top:12px">
+                <label for="e-krilo-zazor">Zazor krila (mm)</label>
+                <input type="number" id="e-krilo-zazor" value="2.5" min="0" step="0.5">
+                <div class="hint">Isti sa svih strana i na sredini</div>
+              </div>
+              <label class="prekidac"><input type="checkbox" id="e-leda" checked> Leđa — visina × širina, bez kanta</label>
+              <label class="prekidac"><input type="checkbox" id="e-nogice"> Nogice — 4 po elementu</label>
+            </div>
+          </div>
+
+          <aside class="el-desno">
+            <div class="card">
+              <div class="kota"><span class="kota-line"></span><span class="kota-label">Pogled spreda</span><span class="kota-line"></span></div>
+              <div class="skica-okvir" id="skica"></div>
+            </div>
+            <div class="card">
+              <div class="kota"><span class="kota-line"></span><span class="kota-label">Materijal</span><span class="kota-line"></span></div>
+              <div id="zbir-povrsina"></div>
+            </div>
+            <div class="card">
+              <div class="kota"><span class="kota-line"></span><span class="kota-label">Okovi</span><span class="kota-line"></span></div>
+              <div id="zbir-okovi"></div>
+            </div>
+            <div class="card">
+              <div class="kota"><span class="kota-line"></span><span class="kota-label">Cena</span><span class="kota-line"></span></div>
+              <div id="zbir-cena"></div>
+              <div class="ukupno-kutija">
+                <div class="ukupno-labela">Ukupno element</div>
+                <div class="ukupno-iznos" id="ukupno-iznos">—</div>
+                <div class="ukupno-detalj" id="ukupno-detalj"></div>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <div style="height:22px"></div>
+
+        <div class="alatka">
+          <div class="kota" style="margin:0;flex:1">
+            <span class="kota-line"></span><span class="kota-label">Delovi</span><span class="kota-line"></span>
+          </div>
+          <button class="btn btn-sm" id="kant-reset">Vrati podrazumevane ivice</button>
+        </div>
+
+        <div class="tabela-okvir">
+          <div class="tabela-skrol">
+            <table class="tab">
+              <thead><tr>
+                <th>Deo</th><th>Dimenzija (cm)</th><th class="r">Kom</th>
+                <th class="r">m²</th><th>Kant — klikni ivicu</th><th class="r">Kant m</th>
+              </tr></thead>
+              <tbody id="delovi-telo"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -309,7 +461,7 @@
 
   <nav class="mob-nav">
     <button class="mob-item" data-strana="projekti">Projekti</button>
-    <button class="mob-item" data-strana="materijali">Materijali</button>
+    <button class="mob-item" data-strana="element">Element</button>
     <button class="mob-item" data-strana="okovi">Okovi</button>
     <button class="mob-item" data-strana="podesavanja">Podešavanja</button>
   </nav>
