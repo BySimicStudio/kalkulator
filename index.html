@@ -2,279 +2,242 @@
 <html lang="sr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Kalkulator — By Simic Studio</title>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0eeea; color: #1a1a1a; min-height: 100vh; padding-bottom: 40px; }
-  .topbar { background: #fff; border-bottom: 0.5px solid #e0e0e0; padding: 14px 16px 12px; position: sticky; top: 0; z-index: 100; }
-  .topbar h1 { font-size: 16px; font-weight: 600; }
-  .topbar p { font-size: 12px; color: #888; margin-top: 1px; }
-  .page { padding: 12px 14px; }
-  .card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 10px; border: 0.5px solid #eee; }
-  .card-title { font-size: 11px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; }
-  .mat-header { display: grid; grid-template-columns: 1fr 68px 56px 32px; gap: 5px; margin-bottom: 6px; }
-  .mat-header span { font-size: 11px; color: #ccc; }
-  .mat-header span:nth-child(2), .mat-header span:nth-child(3) { text-align: right; }
-  .mat-row { display: grid; grid-template-columns: 1fr 68px 56px 32px; gap: 5px; align-items: center; margin-bottom: 8px; }
-  .mat-row select, .mat-row input[type=number] { width: 100%; font-size: 12px; padding: 9px 7px; border: 0.5px solid #e8e8e8; border-radius: 10px; background: #f8f8f6; color: #1a1a1a; -webkit-appearance: none; appearance: none; }
-  .mat-row input[type=number] { text-align: right; }
-  .del-btn { background: none; border: none; color: #ddd; font-size: 20px; cursor: pointer; padding: 0; height: 36px; display: flex; align-items: center; justify-content: center; }
-  .del-btn:active { color: #e74c3c; }
-  .add-btn { font-size: 13px; color: #1D9E75; background: none; border: 0.5px solid #1D9E75; border-radius: 10px; padding: 9px 14px; cursor: pointer; width: 100%; margin-top: 2px; }
-  .rabat-note { font-size: 11px; color: #ccc; margin-top: 8px; text-align: center; }
-  .field-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 0.5px solid #f5f5f5; }
-  .field-row:last-child { border-bottom: none; }
-  .field-label { font-size: 14px; color: #444; flex: 1; }
-  .field-sub { font-size: 11px; color: #bbb; margin-top: 1px; }
-  .input-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-  .field-row input[type=number] { width: 88px; font-size: 15px; font-weight: 500; padding: 8px 10px; border: 0.5px solid #e8e8e8; border-radius: 10px; background: #f8f8f6; color: #1a1a1a; text-align: right; -webkit-appearance: none; }
-  .unit { font-size: 12px; color: #bbb; }
-  .slider-row { padding: 12px 0; border-bottom: 0.5px solid #f5f5f5; }
-  .slider-row:last-child { border-bottom: none; }
-  .slider-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .slider-top label { font-size: 14px; color: #444; }
-  .slider-val { font-size: 20px; font-weight: 700; color: #1a1a1a; }
-  input[type=range] { width: 100%; height: 5px; accent-color: #0F6E56; cursor: pointer; }
-  .slider-hint { font-size: 11px; color: #ccc; margin-top: 5px; }
-  .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-  .metric { background: #f8f8f6; border-radius: 12px; padding: 12px; }
-  .metric.accent { background: #E1F5EE; }
-  .metric .ml { font-size: 11px; color: #999; margin-bottom: 4px; line-height: 1.3; min-height: 28px; }
-  .metric .mv { font-size: 17px; font-weight: 700; color: #1a1a1a; }
-  .metric.accent .mv { color: #0F6E56; }
-  .breakdown { border-top: 0.5px solid #f0f0f0; padding-top: 12px; }
-  .br-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 0.5px solid #f8f8f8; }
-  .br-row:last-child { border-bottom: none; }
-  .br-row .bl { font-size: 13px; color: #777; }
-  .br-row .bv { font-size: 14px; font-weight: 600; color: #1a1a1a; }
-  .br-row.total { border-top: 1px solid #eee; padding-top: 14px; margin-top: 4px; }
-  .br-row.total .bl { font-size: 15px; font-weight: 600; color: #1a1a1a; }
-  .br-row.total .bv { font-size: 24px; font-weight: 700; color: #0F6E56; }
-  .save-inputs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-  .save-inputs input[type=text] { width: 100%; font-size: 15px; padding: 13px 14px; border: 0.5px solid #e8e8e8; border-radius: 12px; background: #f8f8f6; color: #1a1a1a; }
-  .save-inputs input[type=text]::placeholder { color: #ccc; }
-  .save-btn { width: 100%; padding: 16px; background: #0F6E56; color: #fff; font-size: 16px; font-weight: 600; border: none; border-radius: 14px; cursor: pointer; }
-  .save-btn:active { background: #085041; }
-  .save-btn:disabled { background: #aaa; cursor: not-allowed; }
-  .toast { margin-top: 12px; padding: 13px 14px; border-radius: 12px; font-size: 14px; font-weight: 500; text-align: center; display: none; }
-  .toast.show { display: block; }
-  .toast.ok { background: #E1F5EE; color: #0F6E56; }
-  .toast.err { background: #FCEBEB; color: #A32D2D; }
-  .toast.loading { background: #f0f0f0; color: #888; }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#14171A">
+<title>By Simic Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-<div class="topbar">
-  <h1>By Simic Studio</h1>
-  <p>Kalkulator nameštaja po meri</p>
+
+<!-- ================= PRIJAVA ================= -->
+<div class="login-screen" id="login" style="display:none">
+  <form class="login-card" id="login-forma">
+    <div class="login-mark">BY SIMIC STUDIO</div>
+    <h1>Prijava</h1>
+    <p class="sub">Pristup imaju samo nalozi koje si sam napravio.</p>
+
+    <div class="field">
+      <label for="login-email">Email</label>
+      <input type="email" id="login-email" autocomplete="username" required>
+    </div>
+    <div class="field">
+      <label for="login-lozinka">Lozinka</label>
+      <input type="password" id="login-lozinka" autocomplete="current-password" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-block" id="login-dugme">Uđi</button>
+    <div class="poruka" id="login-poruka"></div>
+  </form>
 </div>
-<div class="page">
 
-  <div class="card">
-    <div class="card-title">Materijal — DrvoLux</div>
-    <div class="mat-header"><span>Artikal</span><span>Cena</span><span>Kol.</span><span></span></div>
-    <div id="mat-list"></div>
-    <button class="add-btn" onclick="addRow()">+ Dodaj artikal</button>
-    <div class="rabat-note">Cene sa 10% rabatom već oduzet</div>
-  </div>
+<!-- ================= APLIKACIJA ================= -->
+<div class="app" id="app">
 
-  <div class="card">
-    <div class="card-title">Rad i logistika</div>
-    <div class="field-row"><div class="field-label">Satnica</div><div class="input-wrap"><input type="number" id="satnica" value="1200" min="0" inputmode="numeric" oninput="calc()"><span class="unit">RSD/h</span></div></div>
-    <div class="field-row"><div class="field-label">Sati rada</div><div class="input-wrap"><input type="number" id="sati" value="8" min="0" inputmode="numeric" oninput="calc()"><span class="unit">h</span></div></div>
-    <div class="field-row"><div><div class="field-label">Pomoćni radnik</div><div class="field-sub">11.750 RSD / dan</div></div><div class="input-wrap"><input type="number" id="pomocni" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">dana</span></div></div>
-    <div class="field-row"><div><div class="field-label">Udaljenost</div><div class="field-sub" id="km-hint">do 30km = besplatno</div></div><div class="input-wrap"><input type="number" id="km" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">km</span></div></div>
-    <div class="field-row"><div><div class="field-label">Sprat bez lifta</div><div class="field-sub">2.500 RSD / sprat</div></div><div class="input-wrap"><input type="number" id="sprat" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">sp.</span></div></div>
-    <div class="field-row"><div><div class="field-label">Dnevnica</div><div class="field-sub">6.000 RSD / dan</div></div><div class="input-wrap"><input type="number" id="dnevnica" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">dana</span></div></div>
-    <div class="field-row"><div class="field-label">Ostali troškovi</div><div class="input-wrap"><input type="number" id="ostali" value="0" min="0" inputmode="numeric" oninput="calc()"><span class="unit">RSD</span></div></div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Marža i popust</div>
-    <div class="slider-row">
-      <div class="slider-top"><label>Marža na materijal</label><span class="slider-val" id="mOut">25%</span></div>
-      <input type="range" min="0" max="80" step="1" value="25" id="marza" oninput="mOut.textContent=this.value+'%';calc()">
-      <div class="slider-hint">Dodaješ ovaj % na nabavnu cenu materijala</div>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-name">By Simic Studio</div>
+      <div class="brand-sub">NAMEŠTAJ PO MERI</div>
     </div>
-    <div class="slider-row">
-      <div class="slider-top"><label>Popust klijentu</label><span class="slider-val" id="pOut">0%</span></div>
-      <input type="range" min="0" max="30" step="1" value="0" id="popust" oninput="pOut.textContent=this.value+'%';calc()">
-      <div class="slider-hint">Smanjuje finalnu cenu i tvoju zaradu</div>
-    </div>
-  </div>
 
-  <div class="card">
-    <div class="card-title">Rezultat</div>
-    <div class="metrics">
-      <div class="metric"><div class="ml">Materijal sa maržom</div><div class="mv" id="r-mat">0</div></div>
-      <div class="metric"><div class="ml">Rad i logistika</div><div class="mv" id="r-rad">0</div></div>
-      <div class="metric"><div class="ml">Pre popusta</div><div class="mv" id="r-ukupno">0</div></div>
-      <div class="metric accent"><div class="ml">Finalna cena za klijenta</div><div class="mv" id="r-final">0</div></div>
-    </div>
-    <div class="breakdown">
-      <div class="br-row"><span class="bl">Zarada na radu</span><span class="bv" id="r-zarada">0 RSD</span></div>
-      <div class="br-row"><span class="bl">Zarada na materijalu</span><span class="bv" id="r-mprofit">0 RSD</span></div>
-      <div class="br-row"><span class="bl">Efektivna satnica</span><span class="bv" id="r-eff">—</span></div>
-      <div class="br-row total"><span class="bl">Ukupna zarada</span><span class="bv" id="r-profit">0 RSD</span></div>
-    </div>
-  </div>
+    <nav class="nav">
+      <button class="nav-item" data-strana="projekti">Projekti</button>
+      <button class="nav-item" data-strana="materijali">Materijali <span class="nav-tag">FAZA 1</span></button>
+      <button class="nav-item" data-strana="okovi">Okovi <span class="nav-tag">FAZA 1</span></button>
+      <button class="nav-item" data-strana="klijenti">Klijenti <span class="nav-tag">FAZA 5</span></button>
+      <button class="nav-item" data-strana="ponude">Ponude <span class="nav-tag">FAZA 5</span></button>
+      <button class="nav-item" data-strana="podesavanja">Podešavanja</button>
+    </nav>
 
-  <div class="card">
-    <div class="card-title">Sačuvaj u evidenciju</div>
-    <div class="save-inputs">
-      <input type="text" id="ime-posla" placeholder="Naziv posla (npr. Kuhinja Zemun)">
-      <input type="text" id="ime-klijenta" placeholder="Ime klijenta">
+    <div class="nav-foot">
+      <div class="nav-user" id="nav-email"></div>
+      <button class="nav-item" id="odjava">Odjavi se</button>
     </div>
-    <button class="save-btn" id="save-btn" onclick="saveToSheet()">Sačuvaj u evidenciju</button>
-    <div class="toast" id="toast"></div>
-  </div>
+  </aside>
 
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1 id="page-naslov">Projekti</h1>
+        <div class="page-sub" id="page-sub"></div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ---------- PROJEKTI ---------- -->
+      <section class="view" id="view-projekti">
+        <div class="kanban">
+          <div class="kolona">
+            <div class="kolona-head">
+              <span class="kolona-naziv"><i class="tacka cekanje"></i>Na čekanju</span>
+              <span class="kolona-broj num" id="broj-cekanje">0</span>
+            </div>
+            <div class="kolona-prazna">Prazno</div>
+          </div>
+          <div class="kolona">
+            <div class="kolona-head">
+              <span class="kolona-naziv"><i class="tacka izrada"></i>U izradi</span>
+              <span class="kolona-broj num" id="broj-izrada">0</span>
+            </div>
+            <div class="kolona-prazna">Prazno</div>
+          </div>
+          <div class="kolona">
+            <div class="kolona-head">
+              <span class="kolona-naziv"><i class="tacka gotovo"></i>Završeno</span>
+              <span class="kolona-broj num" id="broj-gotovo">0</span>
+            </div>
+            <div class="kolona-prazna">Prazno</div>
+          </div>
+        </div>
+
+        <div class="empty" style="margin-top:14px">
+          <h3>Projekti stižu u Fazi 2</h3>
+          <p>Prvo ide motor koji iz dimenzija elementa sam izvuče delove, kvadraturu i okove. Bez njega projekat nema šta da sabira.</p>
+        </div>
+      </section>
+
+      <!-- ---------- MATERIJALI ---------- -->
+      <section class="view" id="view-materijali" style="display:none">
+        <div class="empty">
+          <h3>Šifarnik materijala — Faza 1</h3>
+          <p>Ovde ulaze ploče i kant trake sa cenom po m² i po metru, pa konfiguracije koje jednim izborom popune sav materijal na elementu.</p>
+        </div>
+      </section>
+
+      <!-- ---------- OKOVI ---------- -->
+      <section class="view" id="view-okovi" style="display:none">
+        <div class="empty">
+          <h3>Šifarnik okova — Faza 1</h3>
+          <p>Šarke, klizači, nosači i nogice sa cenom po komadu. Šarke i nosači se posle računaju sami iz broja krila i polica.</p>
+        </div>
+      </section>
+
+      <!-- ---------- KLIJENTI ---------- -->
+      <section class="view" id="view-klijenti" style="display:none">
+        <div class="empty">
+          <h3>Klijenti — Faza 5</h3>
+          <p>Kontakt, adresa, broj lične karte za ugovor i svi prošli poslovi sa tim klijentom na jednom mestu.</p>
+        </div>
+      </section>
+
+      <!-- ---------- PONUDE ---------- -->
+      <section class="view" id="view-ponude" style="display:none">
+        <div class="empty">
+          <h3>Ponude — Faza 5</h3>
+          <p>Predračun sa tvojim podacima, avansom i stavkama povučenim iz projekta, spreman za štampu u PDF-u.</p>
+        </div>
+      </section>
+
+      <!-- ---------- PODEŠAVANJA ---------- -->
+      <section class="view" id="view-podesavanja" style="display:none">
+        <form id="pod-forma">
+
+          <div class="card">
+            <div class="kota"><span class="kota-line"></span><span class="kota-label">Podaci firme</span><span class="kota-line"></span></div>
+            <div class="field">
+              <label for="p-naziv_firme">Naziv</label>
+              <input type="text" id="p-naziv_firme">
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="p-telefon">Telefon</label>
+                <input type="text" id="p-telefon">
+              </div>
+              <div class="field">
+                <label for="p-email_kontakt">Email za ponude</label>
+                <input type="text" id="p-email_kontakt">
+              </div>
+            </div>
+            <div class="field">
+              <label for="p-adresa">Adresa</label>
+              <input type="text" id="p-adresa">
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="kota"><span class="kota-line"></span><span class="kota-label">Rad</span><span class="kota-line"></span></div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="p-satnica">Satnica (RSD/h)</label>
+                <input type="number" id="p-satnica" min="0">
+              </div>
+              <div class="field">
+                <label for="p-pomocni_dnevnica">Pomoćni radnik (RSD/dan)</label>
+                <input type="number" id="p-pomocni_dnevnica" min="0">
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="kota"><span class="kota-line"></span><span class="kota-label">Logistika</span><span class="kota-line"></span></div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="p-cena_sprat">Sprat bez lifta (RSD/sprat)</label>
+                <input type="number" id="p-cena_sprat" min="0">
+              </div>
+              <div class="field">
+                <label for="p-dnevnica">Dnevnica sa smeštajem (RSD/dan)</label>
+                <input type="number" id="p-dnevnica" min="0">
+              </div>
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="p-km_besplatno">Besplatno do (km)</label>
+                <input type="number" id="p-km_besplatno" min="0">
+                <div class="hint">Tvoj servisni radijus</div>
+              </div>
+              <div class="field">
+                <label for="p-km_cena_bliza">30–80 km (RSD/km)</label>
+                <input type="number" id="p-km_cena_bliza" min="0">
+                <div class="hint">Računa se povratno</div>
+              </div>
+            </div>
+            <div class="field" style="max-width:calc(50% - 6px)">
+              <label for="p-km_cena_dalja">Preko 80 km (RSD/km)</label>
+              <input type="number" id="p-km_cena_dalja" min="0">
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="kota"><span class="kota-line"></span><span class="kota-label">Marže</span><span class="kota-line"></span></div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="p-marza_default">Podrazumevana marža (%)</label>
+                <input type="number" id="p-marza_default" min="0" max="200">
+                <div class="hint">Dodaje se na nabavnu cenu materijala</div>
+              </div>
+              <div class="field">
+                <label for="p-rabat_dobavljac">Rabat kod dobavljača (%)</label>
+                <input type="number" id="p-rabat_dobavljac" min="0" max="100">
+                <div class="hint">Tvoj popust kod DrvoLux-a</div>
+              </div>
+            </div>
+            <div class="field" style="max-width:calc(50% - 6px)">
+              <label for="p-buffer_avans">Buffer za avans (%)</label>
+              <input type="number" id="p-buffer_avans" min="0" max="100">
+              <div class="hint">Povrh troška materijala i okova</div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="pod-dugme">Sačuvaj podešavanja</button>
+          <div class="poruka" id="pod-poruka"></div>
+        </form>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="mob-nav">
+    <button class="mob-item" data-strana="projekti">Projekti</button>
+    <button class="mob-item" data-strana="materijali">Materijali</button>
+    <button class="mob-item" data-strana="okovi">Okovi</button>
+    <button class="mob-item" data-strana="podesavanja">Podešavanja</button>
+  </nav>
 </div>
-<script>
-const SUPABASE_URL = 'https://cybggjhgsqzwyzoxldkw.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5Ymdnamhnc3F6d3l6b3hsZGt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3OTE2MjQsImV4cCI6MjA5MjM2NzYyNH0.mbOxQGmwVCUqq88b6PZ2cn9trGn2N5fh9yuYOWupR5o';
-const RABAT = 0.10;
 
-const DRVOLUX = [
-  {sifra:'D152/18',   naziv:'Korpus Bela Kastamonu 18mm', tip:'Ploča',      jm:'m²', cena:1249},
-  {sifra:'U12168/18', naziv:'Kasmir Grau 18mm',           tip:'Ploča',      jm:'m²', cena:1869},
-  {sifra:'HDF2201',   naziv:'HDF Beli PF',                tip:'Ploča',      jm:'m²', cena:549},
-  {sifra:'10482G',    naziv:'ABS Bela glatka 23/1',       tip:'Kant traka', jm:'m',  cena:87},
-  {sifra:'U702',      naziv:'ABS Kasmir 23/0.8',          tip:'Kant traka', jm:'m',  cena:138},
-  {sifra:'730425',    naziv:'PVC Kasmir 23/0.5',          tip:'Kant traka', jm:'m',  cena:51},
-  {sifra:'AP23/2',    naziv:'Kantovanje ABS 23/2mm',      tip:'Usluga',     jm:'m',  cena:78},
-  {sifra:'KP23/0.4',  naziv:'Kantovanje PVC 23/0.4mm',    tip:'Usluga',     jm:'m',  cena:45},
-];
-
-function cr(c){return Math.round(c*(1-RABAT));}
-function fmt(n){return Math.round(n).toLocaleString('sr-RS')+' RSD';}
-function fmtN(n){return Math.round(n).toLocaleString('sr-RS');}
-
-let rows=[{sifra:'D152/18',qty:5},{sifra:'10482G',qty:20},{sifra:'AP23/2',qty:20}];
-
-function buildSelect(sel){
-  let o='<option value="">— Odaberi —</option>',g={};
-  DRVOLUX.forEach(x=>{if(!g[x.tip])g[x.tip]=[];g[x.tip].push(x);});
-  Object.entries(g).forEach(([tip,items])=>{
-    o+=`<optgroup label="${tip}">`;
-    items.forEach(x=>{o+=`<option value="${x.sifra}"${x.sifra===sel?' selected':''}>${x.naziv} (${cr(x.cena).toLocaleString('sr-RS')}/${x.jm})</option>`;});
-    o+='</optgroup>';
-  });
-  return o;
-}
-
-function renderRows(){
-  const el=document.getElementById('mat-list');el.innerHTML='';
-  rows.forEach((r,i)=>{
-    const it=DRVOLUX.find(x=>x.sifra===r.sifra),cena=it?cr(it.cena):0;
-    const d=document.createElement('div');d.className='mat-row';
-    d.innerHTML=`
-      <select onchange="rows[${i}].sifra=this.value;renderRows();">${buildSelect(r.sifra)}</select>
-      <input type="number" value="${cena}" readonly style="opacity:0.5;">
-      <input type="number" value="${r.qty}" min="0" step="0.01" inputmode="decimal" oninput="rows[${i}].qty=+this.value;calc()">
-      <button class="del-btn" onclick="rows.splice(${i},1);renderRows();">×</button>`;
-    el.appendChild(d);
-  });
-  calc();
-}
-
-function addRow(){rows.push({sifra:'',qty:1});renderRows();}
-
-function getV(){
-  let matBase=0;
-  rows.forEach(r=>{const it=DRVOLUX.find(x=>x.sifra===r.sifra);if(it)matBase+=cr(it.cena)*r.qty;});
-  const marza=+document.getElementById('marza').value/100;
-  const popust=+document.getElementById('popust').value/100;
-  const satnica=+document.getElementById('satnica').value||1200;
-  const sati=+document.getElementById('sati').value||0;
-  const pomocni=(+document.getElementById('pomocni').value||0)*11750;
-  const km=+document.getElementById('km').value||0;
-  const sprat=(+document.getElementById('sprat').value||0)*2500;
-  const dnevnica=(+document.getElementById('dnevnica').value||0)*6000;
-  const ostali=+document.getElementById('ostali').value||0;
-  let gorivo=0,kmHint='do 30km = besplatno';
-  if(km>80){gorivo=km*2*20;kmHint=fmtN(gorivo)+' RSD (20/km)';}
-  else if(km>30){gorivo=km*2*15;kmHint=fmtN(gorivo)+' RSD (15/km)';}
-  else if(km>0){kmHint='besplatno (do 30km)';}
-  document.getElementById('km-hint').textContent=kmHint;
-  const matM=matBase*(1+marza);
-  const rad=satnica*sati+pomocni+gorivo+sprat+dnevnica+ostali;
-  const ukupno=matM+rad,final=ukupno*(1-popust),pi=ukupno-final;
-  const profit=matBase*marza+satnica*sati-pi;
-  return{matBase,matM,rad,ukupno,final,pi,profit,marza,popust,satnica,sati};
-}
-
-function calc(){
-  const v=getV();
-  document.getElementById('r-mat').textContent=fmtN(v.matM);
-  document.getElementById('r-rad').textContent=fmtN(v.rad);
-  document.getElementById('r-ukupno').textContent=fmtN(v.ukupno);
-  document.getElementById('r-final').textContent=fmtN(v.final);
-  document.getElementById('r-zarada').textContent=fmt(v.satnica*v.sati);
-  document.getElementById('r-mprofit').textContent=fmt(v.matBase*v.marza-v.pi);
-  document.getElementById('r-profit').textContent=fmt(v.profit);
-  document.getElementById('r-eff').textContent=v.sati>0?Math.round(v.profit/v.sati).toLocaleString('sr-RS')+' RSD/h':'—';
-}
-
-function showToast(msg,tip){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.className='toast show '+tip;
-}
-
-async function saveToSheet(){
-  const ime=document.getElementById('ime-posla').value.trim();
-  const klijent=document.getElementById('ime-klijenta').value.trim();
-  if(!ime){showToast('Unesi naziv posla','err');return;}
-
-  const v=getV();
-  const btn=document.getElementById('save-btn');
-  btn.disabled=true;
-  showToast('Čuvam...','loading');
-
-  const payload={
-    datum:         new Date().toLocaleDateString('sr-RS'),
-    posao:         ime,
-    klijent:       klijent||'—',
-    mat_nabavna:   Math.round(v.matBase),
-    mat_marza:     Math.round(v.matM),
-    rad_logistika: Math.round(v.rad),
-    ukupno_pre:    Math.round(v.ukupno),
-    finalna_cena:  Math.round(v.final),
-    zarada:        Math.round(v.profit),
-    marza_proc:    Math.round(v.marza*100)+'%',
-    status:        'Na čekanju',
-    napomena:      ''
-  };
-
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/poslovi`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if(res.ok || res.status === 201) {
-      showToast('Sačuvano u evidenciju!', 'ok');
-      document.getElementById('ime-posla').value='';
-      document.getElementById('ime-klijenta').value='';
-    } else {
-      const err = await res.text();
-      showToast('Greška: '+err, 'err');
-    }
-  } catch(err){
-    showToast('Greška: '+err.message,'err');
-  }
-
-  btn.disabled=false;
-}
-
-renderRows();
-</script>
+<script type="module" src="js/app.js"></script>
 </body>
 </html>
