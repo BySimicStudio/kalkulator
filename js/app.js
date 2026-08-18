@@ -1,6 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 import { ucitajSifarnike, povezSifarnike } from './sifarnik.js';
+import { ucitajElement, povezElement } from './element.js';
 
 export const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -65,6 +66,7 @@ async function odjavi() {
    =================================================================== */
 const STRANE = {
   projekti:    { naslov: 'Projekti',    sub: 'Svi poslovi na jednom mestu' },
+  element:     { naslov: 'Element',     sub: 'Dimenzije ulaze, delovi i cena izlaze' },
   materijali:  { naslov: 'Materijali',  sub: 'Ploče, kant trake i konfiguracije' },
   okovi:       { naslov: 'Okovi',       sub: 'Šifarnik sa cenama po komadu' },
   klijenti:    { naslov: 'Klijenti',    sub: 'Kontakti i istorija saradnje' },
@@ -127,6 +129,7 @@ async function sacuvajProfil(e) {
   if (error) return poruka(msg, 'Nije sačuvano: ' + error.message, 'gre');
   poruka(msg, 'Podešavanja sačuvana.', 'ok');
   await ucitajSifarnike();   // rabat se možda promenio
+  await ucitajElement();
 }
 
 /* ===================================================================
@@ -151,6 +154,7 @@ async function pokreniAplikaciju() {
 
   await ucitajProfil();
   await Promise.all([ucitajProjekte(), ucitajSifarnike()]);
+  await ucitajElement();
   otvori('projekti');
 }
 
@@ -161,6 +165,7 @@ async function init() {
     b.addEventListener('click', () => otvori(b.dataset.strana)));
   $('#odjava').addEventListener('click', odjavi);
   povezSifarnike();
+  povezElement();
 
   const { data } = await db.auth.getSession();
   if (data.session) {
