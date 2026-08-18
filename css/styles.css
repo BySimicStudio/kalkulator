@@ -520,3 +520,92 @@ table.tab th.r, table.tab td.r { text-align: right; }
   .modal { max-width: none; border-radius: 0; min-height: 100vh; }
   .alatka { flex-direction: column; align-items: stretch; }
 }
+
+/* =====================================================================
+   FAZA 1b — element
+   ===================================================================== */
+
+.el-mreza { display: grid; grid-template-columns: 1fr 300px; gap: 14px; align-items: start; }
+.el-desno { position: sticky; top: 84px; }
+
+.izbor { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.izbor.tri { grid-template-columns: repeat(3, 1fr); }
+.izbor label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 10px 12px;
+  cursor: pointer;
+  background: var(--surface);
+}
+.izbor label:hover { border-color: var(--ink-3); }
+.izbor input[type=radio] { accent-color: var(--blueprint); margin: 0; }
+.izbor input[type=radio]:checked + span { color: var(--ink); font-weight: 500; }
+.izbor label:has(input:checked) { border-color: var(--blueprint); background: var(--blueprint-soft); }
+.izbor input:focus-visible { outline: 2px solid var(--blueprint); outline-offset: 3px; }
+
+.prekidac { display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--ink-2); cursor: pointer; padding: 7px 0; }
+.prekidac input { accent-color: var(--blueprint); width: 16px; height: 16px; }
+
+.skica-okvir {
+  background: repeating-linear-gradient(0deg, var(--line-soft) 0 1px, transparent 1px 22px),
+              repeating-linear-gradient(90deg, var(--line-soft) 0 1px, transparent 1px 22px),
+              var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 8px;
+}
+
+svg.ivice { display: block; }
+
+.stav {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ink-2);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.stav:last-child { border-bottom: none; }
+.stav b { color: var(--ink); font-weight: 500; }
+
+.ukupno-kutija {
+  background: var(--ink);
+  color: #fff;
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  margin-top: 14px;
+}
+.ukupno-labela {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #8D99A5;
+}
+.ukupno-iznos {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 25px;
+  font-weight: 500;
+  margin: 4px 0 5px;
+}
+.ukupno-detalj { font-size: 11.5px; color: #8D99A5; }
+
+.nema-cene { font-size: 13px; color: var(--ink-3); padding: 6px 0; }
+
+@media (max-width: 1000px) {
+  .el-mreza { grid-template-columns: 1fr; }
+  .el-desno { position: static; }
+}
+@media (max-width: 860px) {
+  .izbor { grid-template-columns: 1fr; }
+  .izbor.tri { grid-template-columns: 1fr; }
+}
