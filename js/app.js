@@ -1,59 +1,60 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
+import { ucitajSifarnike, povezSifarnike } from './sifarnik.js';
 
-const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+export const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 
-let korisnik = null;
+let _korisnik = null;
+export const korisnik = () => _korisnik;
 
 /* ===================================================================
    PORUKE
    =================================================================== */
-function poruka(el, tekst, vrsta = 'ok') {
+export function poruka(el, tekst, vrsta = 'ok') {
+  if (!el) return;
   el.textContent = tekst;
   el.className = `poruka vidljiva ${vrsta}`;
+  if (vrsta === 'ok') setTimeout(() => { el.className = 'poruka'; }, 4000);
 }
-function sakrijPoruku(el) { el.className = 'poruka'; }
+function sakrijPoruku(el) { if (el) el.className = 'poruka'; }
 
 /* ===================================================================
    PRIJAVA
    =================================================================== */
 async function prijavi(e) {
   e.preventDefault();
-  const email = $('#login-email').value.trim();
-  const lozinka = $('#login-lozinka').value;
   const dugme = $('#login-dugme');
   const msg = $('#login-poruka');
 
   dugme.disabled = true;
   poruka(msg, 'Prijavljujem…', 'rad');
 
-  const { data, error } = await db.auth.signInWithPassword({ email, password: lozinka });
+  const { data, error } = await db.auth.signInWithPassword({
+    email: $('#login-email').value.trim(),
+    password: $('#login-lozinka').value,
+  });
 
-  if (error) {
-    poruka(msg, prevediGresku(error.message), 'gre');
-    dugme.disabled = false;
-    return;
-  }
-
-  korisnik = data.user;
-  sakrijPoruku(msg);
   dugme.disabled = false;
+  if (error) return poruka(msg, prevediGresku(error.message), 'gre');
+
+  _korisnik = data.user;
+  sakrijPoruku(msg);
   await pokreniAplikaciju();
 }
 
-function prevediGresku(poruka) {
-  if (/invalid login credentials/i.test(poruka)) return 'Pogrešan email ili lozinka.';
-  if (/email not confirmed/i.test(poruka))       return 'Nalog još nije potvrđen.';
-  if (/failed to fetch/i.test(poruka))           return 'Nema veze sa serverom. Proveri internet.';
-  return poruka;
+function prevediGresku(p) {
+  if (/invalid login credentials/i.test(p)) return 'Pogrešan email ili lozinka.';
+  if (/email not confirmed/i.test(p))       return 'Nalog još nije potvrđen.';
+  if (/failed to fetch/i.test(p))           return 'Nema veze sa serverom. Proveri internet.';
+  return p;
 }
 
 async function odjavi() {
   await db.auth.signOut();
-  korisnik = null;
+  _korisnik = null;
   $('#app').classList.remove('active');
   $('#login').style.display = 'grid';
   $('#login-lozinka').value = '';
@@ -63,11 +64,11 @@ async function odjavi() {
    NAVIGACIJA
    =================================================================== */
 const STRANE = {
-  projekti:    { naslov: 'Projekti',   sub: 'Svi poslovi na jednom mestu' },
-  materijali:  { naslov: 'Materijali', sub: 'Ploče, kant trake i konfiguracije' },
-  okovi:       { naslov: 'Okovi',      sub: 'Šifarnik sa cenama po komadu' },
-  klijenti:    { naslov: 'Klijenti',   sub: 'Kontakti i istorija saradnje' },
-  ponude:      { naslov: 'Ponude',     sub: 'Predračuni i ugovori' },
+  projekti:    { naslov: 'Projekti',    sub: 'Svi poslovi na jednom mestu' },
+  materijali:  { naslov: 'Materijali',  sub: 'Ploče, kant trake i konfiguracije' },
+  okovi:       { naslov: 'Okovi',       sub: 'Šifarnik sa cenama po komadu' },
+  klijenti:    { naslov: 'Klijenti',    sub: 'Kontakti i istorija saradnje' },
+  ponude:      { naslov: 'Ponude',      sub: 'Predračuni i ugovori' },
   podesavanja: { naslov: 'Podešavanja', sub: 'Cenovnik rada, marže i podaci firme' },
 };
 
@@ -76,7 +77,7 @@ function otvori(strana) {
   const view = $(`#view-${strana}`);
   if (view) view.style.display = 'block';
 
-  $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.strana === strana));
+  $$('.nav-item[data-strana]').forEach(b => b.classList.toggle('active', b.dataset.strana === strana));
   $$('.mob-item').forEach(b => b.classList.toggle('active', b.dataset.strana === strana));
 
   const meta = STRANE[strana];
@@ -88,9 +89,9 @@ function otvori(strana) {
 }
 
 /* ===================================================================
-   PODEŠAVANJA — čita i piše u tabelu `profili`
+   PODEŠAVANJA
    =================================================================== */
-const POLJA_PROFILA = [
+const POLJA = [
   'naziv_firme', 'telefon', 'adresa', 'email_kontakt',
   'satnica', 'pomocni_dnevnica', 'cena_sprat', 'dnevnica',
   'km_besplatno', 'km_cena_bliza', 'km_cena_dalja',
@@ -98,9 +99,9 @@ const POLJA_PROFILA = [
 ];
 
 async function ucitajProfil() {
-  const { data, error } = await db.from('profili').select('*').eq('id', korisnik.id).single();
-  if (error || !data) return;
-  POLJA_PROFILA.forEach(k => {
+  const { data } = await db.from('profili').select('*').eq('id', _korisnik.id).single();
+  if (!data) return;
+  POLJA.forEach(k => {
     const el = $(`#p-${k}`);
     if (el && data[k] !== null && data[k] !== undefined) el.value = data[k];
   });
@@ -111,8 +112,8 @@ async function sacuvajProfil(e) {
   const msg = $('#pod-poruka');
   const dugme = $('#pod-dugme');
 
-  const izmene = { id: korisnik.id };
-  POLJA_PROFILA.forEach(k => {
+  const izmene = { id: _korisnik.id };
+  POLJA.forEach(k => {
     const el = $(`#p-${k}`);
     if (!el) return;
     izmene[k] = el.type === 'number' ? (el.value === '' ? null : Number(el.value)) : el.value.trim();
@@ -120,29 +121,24 @@ async function sacuvajProfil(e) {
 
   dugme.disabled = true;
   poruka(msg, 'Čuvam…', 'rad');
-
   const { error } = await db.from('profili').upsert(izmene);
-
   dugme.disabled = false;
-  if (error) poruka(msg, 'Nije sačuvano: ' + error.message, 'gre');
-  else       poruka(msg, 'Podešavanja sačuvana.', 'ok');
+
+  if (error) return poruka(msg, 'Nije sačuvano: ' + error.message, 'gre');
+  poruka(msg, 'Podešavanja sačuvana.', 'ok');
+  await ucitajSifarnike();   // rabat se možda promenio
 }
 
 /* ===================================================================
-   PROJEKTI — Faza 0: samo prikaz kanban kolona
+   PROJEKTI (Faza 2)
    =================================================================== */
 async function ucitajProjekte() {
-  const { data, error } = await db
-    .from('projekti')
-    .select('id, naziv, status, rok')
-    .order('created_at', { ascending: false });
-
-  const brojevi = { na_cekanju: 0, u_izradi: 0, zavrseno: 0 };
-  if (!error && data) data.forEach(p => { if (brojevi[p.status] !== undefined) brojevi[p.status]++; });
-
-  $('#broj-cekanje').textContent = brojevi.na_cekanju;
-  $('#broj-izrada').textContent  = brojevi.u_izradi;
-  $('#broj-gotovo').textContent  = brojevi.zavrseno;
+  const { data } = await db.from('projekti').select('id, status');
+  const b = { na_cekanju: 0, u_izradi: 0, zavrseno: 0 };
+  (data || []).forEach(p => { if (b[p.status] !== undefined) b[p.status]++; });
+  $('#broj-cekanje').textContent = b.na_cekanju;
+  $('#broj-izrada').textContent  = b.u_izradi;
+  $('#broj-gotovo').textContent  = b.zavrseno;
 }
 
 /* ===================================================================
@@ -151,23 +147,24 @@ async function ucitajProjekte() {
 async function pokreniAplikaciju() {
   $('#login').style.display = 'none';
   $('#app').classList.add('active');
-  $('#nav-email').textContent = korisnik.email;
+  $('#nav-email').textContent = _korisnik.email;
 
-  await Promise.all([ucitajProfil(), ucitajProjekte()]);
+  await ucitajProfil();
+  await Promise.all([ucitajProjekte(), ucitajSifarnike()]);
   otvori('projekti');
 }
 
 async function init() {
   $('#login-forma').addEventListener('submit', prijavi);
   $('#pod-forma').addEventListener('submit', sacuvajProfil);
-  $$('.nav-item, .mob-item').forEach(b =>
-    b.addEventListener('click', () => otvori(b.dataset.strana))
-  );
+  $$('.nav-item[data-strana], .mob-item').forEach(b =>
+    b.addEventListener('click', () => otvori(b.dataset.strana)));
   $('#odjava').addEventListener('click', odjavi);
+  povezSifarnike();
 
   const { data } = await db.auth.getSession();
   if (data.session) {
-    korisnik = data.session.user;
+    _korisnik = data.session.user;
     await pokreniAplikaciju();
   } else {
     $('#login').style.display = 'grid';
