@@ -88,6 +88,12 @@ function otvori(strana) {
     $('#page-sub').textContent = meta.sub;
   }
   window.scrollTo(0, 0);
+
+  /* Cene se možda menjale u drugom tabu — povuci sveže stanje.
+     Unos u formi elementa ostaje netaknut, čuva se posebno. */
+  if (strana === 'element') ucitajElement();
+  if (strana === 'materijali' || strana === 'okovi') ucitajSifarnike();
+  if (strana === 'projekti') ucitajProjekte();
 }
 
 /* ===================================================================
