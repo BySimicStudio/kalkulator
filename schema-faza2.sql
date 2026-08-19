@@ -3,10 +3,29 @@
 -- Pokreni jednom u Supabase SQL editoru. Skripta je idempotentna:
 -- može da se pokrene više puta bez štete.
 --
--- NAPOMENA: pretpostavka je da su id kolone bigint (identity), kao i u
--- ostatku šeme. Ako je projekti.id slučajno uuid, promeni tip kolone
--- projekat_id u tri tabele ispod u uuid pre pokretanja.
+-- Supabase SQL editor vrti ceo fajl kao jednu transakciju — ako bilo šta
+-- pukne, ništa se ne primeni. Nema polovičnog stanja.
 -- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- Čišćenje ostatka stare šeme.
+-- U bazi je zatečena tabela projekat_okovi iz starog kalkulatora, bez
+-- kolone korisnik_id — Filip je potvrdio da je prazna. Briše se samo taj
+-- stari oblik: uslov je da nema korisnik_id, pa ponovno pokretanje ove
+-- skripte kasnije NE dira tabelu koju pravimo ispod.
+-- ---------------------------------------------------------------------
+do $$
+begin
+  if to_regclass('public.projekat_okovi') is not null
+     and not exists (
+       select 1 from information_schema.columns
+       where table_schema = 'public'
+         and table_name = 'projekat_okovi'
+         and column_name = 'korisnik_id')
+  then
+    drop table public.projekat_okovi cascade;
+  end if;
+end $$;
 
 -- ---------------------------------------------------------------------
 -- projekti — tabela možda već postoji iz prve šeme, pravimo je samo ako fali
@@ -119,7 +138,23 @@ create table if not exists public.sabloni (
 
 -- ---------------------------------------------------------------------
 -- RLS — svako vidi samo svoje
+--
+-- Prvo osiguranje: ako je neka od ovih tabela zatečena iz stare šeme bez
+-- kolone korisnik_id, dodaj je pre nego što politika krene da je traži.
+-- Kolona namerno nije NOT NULL — postojeći redovi bi pali na toj proveri,
+-- a ovako ih politika prosto ne prikazuje nikome dok im se ne upiše vlasnik.
 -- ---------------------------------------------------------------------
+do $$
+declare t text;
+begin
+  foreach t in array array['projekat_elementi', 'projekat_okovi', 'projekat_zadaci', 'sabloni']
+  loop
+    execute format(
+      'alter table public.%I add column if not exists korisnik_id uuid
+         default auth.uid() references auth.users(id) on delete cascade', t);
+  end loop;
+end $$;
+
 do $$
 declare t text;
 begin
