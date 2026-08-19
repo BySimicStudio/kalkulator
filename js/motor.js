@@ -49,7 +49,7 @@ export const GRUPA_DELA = {
      fiksnaPolica,
      tipKrila: 'bez' | 'jednodelno' | 'dvodelno',
      zazorKrila,                    // mm
-     imaLeda,
+     tipLeda: 'bez' | 'hdf' | 'puna', zazorLeda, debljinaLeda,
      kant: { bocna: [...], dno: [...], ... }
    }
    --------------------------------------------------------------------- */
@@ -95,9 +95,12 @@ export function generisiDelove(el) {
     dodaj('vez', S - 2 * t, el.sirinaVeza ?? 80, 2);
   }
 
-  /* --- police --- */
+  /* --- police ---
+     Puna leđa upadaju unutar korpusa i oduzimaju svoju debljinu od dubine
+     police. HDF leđa naležu spolja, pa policu ne skraćuju.               */
   if (el.brojPolica > 0) {
-    const dubP = el.dubinaPolice ? el.dubinaPolice : D - uvl;
+    const tL = el.tipLeda === 'puna' ? (el.debljinaLeda ?? t) : 0;
+    const dubP = el.dubinaPolice ? el.dubinaPolice : D - uvl - tL;
     dodaj('polica', S - 2 * t - zP, dubP, el.brojPolica);
   }
 
@@ -108,8 +111,17 @@ export function generisiDelove(el) {
     dodaj('krilo', V - 2 * zK, (S - 3 * zK) / 2, 2);
   }
 
-  /* --- leđa --- */
-  if (el.imaLeda) dodaj('leda', V, S, 1);
+  /* --- leđa ---
+     HDF  → naležu preko cele zadnje strane, minus mali zazor sa svih strana
+     puna → upadaju unutar korpusa između bočnih, dna i plafona            */
+  if (el.tipLeda === 'hdf') {
+    const zL = el.zazorLeda ?? 2;
+    dodaj('leda', V - 2 * zL, S - 2 * zL, 1);
+  } else if (el.tipLeda === 'puna') {
+    const tL = el.debljinaLeda ?? t;
+    const visinaLeda = el.tipSpoja === 2 ? V - tL : V - 2 * tL;
+    dodaj('leda', visinaLeda, S - 2 * tL, 1);
+  }
 
   return delovi;
 }
