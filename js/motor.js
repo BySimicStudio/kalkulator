@@ -206,3 +206,74 @@ export function izracunajCenu(delovi, materijali, rabat = 0) {
 }
 
 function round1(x) { return Math.round(x * 10) / 10; }
+
+/* ---------------------------------------------------------------------
+   RAD, LOGISTIKA I PROFIT — Faza 2
+   Sve ostaje bez DOM-a, ulaz su obični brojevi.
+
+   rad    = { sati, pomocniDana, spratovi, kilometri, danaSmestaj, marza, popust }
+   profil = { satnica, pomocni_dnevnica, cena_sprat, dnevnica,
+              km_besplatno, km_cena_bliza, km_cena_dalja,
+              marza_default, buffer_avans }
+   marza u radu je null kad projekat koristi podrazumevanu iz profila.
+   --------------------------------------------------------------------- */
+export function izracunajPut(kilometri, profil = {}) {
+  const km = Number(kilometri) || 0;
+  const besplatno = Number(profil.km_besplatno) || 0;
+  // Naplaćuje se samo ono preko servisnog radijusa, i to povratno.
+  const naplativi = Math.max(0, km - besplatno) * 2;
+  const stopa = km > 80
+    ? (Number(profil.km_cena_dalja) || 0)
+    : (Number(profil.km_cena_bliza) || 0);
+  return { naplativiKm: naplativi, stopa, iznos: naplativi * stopa };
+}
+
+export function izracunajProjekat({ materijal = 0, okovi = 0, rad = {}, profil = {} }) {
+  const n = (x) => Number(x) || 0;
+
+  const sati  = n(rad.sati);
+  const marza = (rad.marza ?? profil.marza_default ?? 0) / 100;
+  const popustProcenat = n(rad.popust) / 100;
+
+  /* --- prihod --- */
+  const prihodMaterijal = materijal * (1 + marza);
+  const prihodOkovi     = okovi * (1 + marza);
+  const iznosRada       = sati * n(profil.satnica);
+
+  const iznosSpratova = n(rad.spratovi) * n(profil.cena_sprat);
+  const put           = izracunajPut(rad.kilometri, profil);
+  const iznosSmestaja = n(rad.danaSmestaj) * n(profil.dnevnica);
+  const logistika     = iznosSpratova + put.iznos + iznosSmestaja;
+
+  const prePopusta = prihodMaterijal + prihodOkovi + iznosRada + logistika;
+  const popust     = prePopusta * popustProcenat;
+  const prihod     = prePopusta - popust;
+
+  /* --- trošak --- */
+  const pomocni = n(rad.pomocniDana) * n(profil.pomocni_dnevnica);
+  const trosak  = materijal + okovi + pomocni;
+
+  /* --- šta zaista ostaje --- */
+  const zarada = prihod - trosak;
+
+  return {
+    prihod: {
+      materijal: prihodMaterijal,
+      okovi: prihodOkovi,
+      rad: iznosRada,
+      spratovi: iznosSpratova,
+      put: put.iznos,
+      smestaj: iznosSmestaja,
+      logistika,
+      popust,
+      ukupno: prihod,
+    },
+    trosak: { materijal, okovi, pomocni, ukupno: trosak },
+    put,
+    marzaProcenat: marza * 100,
+    zarada,
+    udeoZarade: prihod ? (zarada / prihod) * 100 : 0,
+    efektivnaSatnica: sati ? zarada / sati : 0,
+    avans: (materijal + okovi) * (1 + n(profil.buffer_avans) / 100),
+  };
+}

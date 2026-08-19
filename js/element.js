@@ -380,3 +380,66 @@ export function povezElement() {
     location.reload();
   };
 }
+
+/* ===================================================================
+   MOST KA PROJEKTIMA — Faza 2
+   Element tab ostaje brza računica, ali ume i da preda svoj unos
+   projektu, i da primi nazad element koji se uređuje.
+   =================================================================== */
+export function trenutniElement() {
+  const id = (sel) => {
+    const v = $(sel)?.value;
+    return v === '' || v === undefined ? null : Number(v);
+  };
+  return {
+    parametri:        procitajElement(),
+    konfiguracija_id: id('#e-konfiguracija'),
+    okov_sarka_id:    id('#e-okov-sarka'),
+    okov_nosac_id:    id('#e-okov-nosac'),
+    okov_nogica_id:   id('#e-okov-nogica'),
+  };
+}
+
+export function postaviElement(zapis) {
+  const p = zapis?.parametri || {};
+  const upisi = (id, v) => { const el = $('#' + id); if (el && v !== undefined && v !== null) el.value = v; };
+  const cekiraj = (ime, v) => { const el = $(`input[name=${ime}][value="${v}"]`); if (el) el.checked = true; };
+
+  upisi('e-visina', p.visina);
+  upisi('e-sirina', p.sirina);
+  upisi('e-dubina', p.dubina);
+  upisi('e-debljina', p.debljina);
+  upisi('e-broj', p.brojElemenata);
+  upisi('e-vez-sirina', p.sirinaVeza);
+  upisi('e-police', p.brojPolica);
+  upisi('e-polica-dubina', p.dubinaPolice);
+  upisi('e-polica-uvlacenje', p.uvlacenjePolice);
+  upisi('e-polica-zazor', p.zazorPolice);
+  upisi('e-krilo-zazor', p.zazorKrila);
+  upisi('e-leda-zazor', p.zazorLeda);
+  upisi('e-leda-debljina', p.debljinaLeda);
+
+  cekiraj('tip-spoja', p.tipSpoja ?? 1);
+  cekiraj('plafon', p.plafonVezovi ?? 'plafon');
+  cekiraj('krilo', p.tipKrila ?? 'bez');
+  cekiraj('leda', p.tipLeda ?? 'hdf');
+
+  const kv = (id, v) => { const el = $('#' + id); if (el) el.checked = !!v; };
+  kv('e-polica-fiksna', p.fiksnaPolica);
+  kv('e-nogice', p.imaNogice);
+
+  kant = { ...JSON.parse(JSON.stringify(KANT_PODRAZUMEVANO)), ...(p.kant || {}) };
+
+  const izaberi = (sel, v) => {
+    const el = $(sel);
+    if (!el) return;
+    const s = v === null || v === undefined ? '' : String(v);
+    el.value = Array.from(el.options).some(o => o.value === s) ? s : '';
+  };
+  izaberi('#e-konfiguracija', zapis?.konfiguracija_id);
+  izaberi('#e-okov-sarka',    zapis?.okov_sarka_id);
+  izaberi('#e-okov-nosac',    zapis?.okov_nosac_id);
+  izaberi('#e-okov-nogica',   zapis?.okov_nogica_id);
+
+  preracunaj();
+}

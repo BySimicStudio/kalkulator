@@ -47,8 +47,8 @@
       <button class="nav-item" data-strana="element">Element</button>
       <button class="nav-item" data-strana="materijali">Materijali</button>
       <button class="nav-item" data-strana="okovi">Okovi</button>
-      <button class="nav-item" data-strana="klijenti">Klijenti <span class="nav-tag">FAZA 5</span></button>
-      <button class="nav-item" data-strana="ponude">Ponude <span class="nav-tag">FAZA 5</span></button>
+      <button class="nav-item" data-strana="klijenti">Klijenti <span class="nav-tag">FAZA 4</span></button>
+      <button class="nav-item" data-strana="ponude">Ponude <span class="nav-tag">FAZA 4</span></button>
       <button class="nav-item" data-strana="podesavanja">Podešavanja</button>
     </nav>
 
@@ -70,38 +70,266 @@
 
       <!-- ---------- PROJEKTI ---------- -->
       <section class="view" id="view-projekti">
+        <div class="alatka">
+          <div style="font-size:13px;color:var(--ink-2);max-width:520px">
+            Kartu prevučeš u drugu kolonu ili je pomeriš strelicama. Iznos na kartici je cena za klijenta, ispod nje ono što na poslu zaista ostaje.
+          </div>
+          <button class="btn btn-primary btn-sm" id="pr-novi">Novi projekat</button>
+        </div>
+
+        <div class="poruka vidljiva gre" id="kanban-greska" style="display:none"></div>
+
         <div class="kanban">
           <div class="kolona">
             <div class="kolona-head">
               <span class="kolona-naziv"><i class="tacka cekanje"></i>Na čekanju</span>
               <span class="kolona-broj num" id="broj-cekanje">0</span>
             </div>
-            <div class="kolona-prazna">Prazno</div>
+            <div class="kolona-telo" id="kolona-cekanje"></div>
           </div>
           <div class="kolona">
             <div class="kolona-head">
               <span class="kolona-naziv"><i class="tacka izrada"></i>U izradi</span>
               <span class="kolona-broj num" id="broj-izrada">0</span>
             </div>
-            <div class="kolona-prazna">Prazno</div>
+            <div class="kolona-telo" id="kolona-izrada"></div>
           </div>
           <div class="kolona">
             <div class="kolona-head">
               <span class="kolona-naziv"><i class="tacka gotovo"></i>Završeno</span>
               <span class="kolona-broj num" id="broj-gotovo">0</span>
             </div>
-            <div class="kolona-prazna">Prazno</div>
+            <div class="kolona-telo" id="kolona-gotovo"></div>
           </div>
         </div>
 
-        <div class="empty" style="margin-top:14px">
-          <h3>Projekti stižu u Fazi 2</h3>
-          <p>Prvo ide motor koji iz dimenzija elementa sam izvuče delove, kvadraturu i okove. Bez njega projekat nema šta da sabira.</p>
+        <div class="poruka" id="projekti-poruka"></div>
+      </section>
+
+      <!-- ---------- JEDAN PROJEKAT ---------- -->
+      <section class="view" id="view-projekat" style="display:none">
+
+        <div class="p-glava">
+          <button class="btn btn-sm" id="pr-nazad">← Svi projekti</button>
+          <div class="p-glava-info">
+            <div class="p-glava-naziv" id="pr-naziv"></div>
+            <div class="p-glava-sub" id="pr-sub"></div>
+          </div>
+          <div class="p-glava-akcije">
+            <select id="pr-status" aria-label="Status projekta">
+              <option value="na_cekanju">Na čekanju</option>
+              <option value="u_izradi">U izradi</option>
+              <option value="zavrseno">Završeno</option>
+            </select>
+            <button class="btn btn-sm" id="pr-izmeni">Podaci</button>
+            <button class="btn btn-sm btn-opasno" id="pr-brisi">Obriši</button>
+          </div>
         </div>
+
+        <div class="podtabovi">
+          <button class="podtab active" data-podtab="elementi">Elementi <span class="podtab-broj num" id="pt-broj-elementi">0</span></button>
+          <button class="podtab" data-podtab="okovi">Okovi <span class="podtab-broj num" id="pt-broj-okovi">0</span></button>
+          <button class="podtab" data-podtab="rad">Rad</button>
+          <button class="podtab" data-podtab="cena">Cena</button>
+          <button class="podtab" data-podtab="zadaci">Zadaci <span class="podtab-broj num" id="pt-broj-zadaci">0</span></button>
+        </div>
+
+        <!-- ····· ELEMENTI ····· -->
+        <div class="podstrana" id="pod-elementi">
+          <div class="alatka">
+            <div style="font-size:13px;color:var(--ink-2);max-width:520px">
+              Element pamti parametre, ne iznos — kad promeniš cenovnik, ceo projekat se sam preračuna.
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-sm" id="pel-sablon">Iz šablona</button>
+              <button class="btn btn-primary btn-sm" id="pel-novi">Novi element</button>
+            </div>
+          </div>
+
+          <div class="empty" id="pel-prazno">
+            <h3>Projekat je prazan</h3>
+            <p>Otvori tab Element, podesi dimenzije i klikni „Dodaj u projekat”. Ili ubaci gotov element iz šablona.</p>
+          </div>
+
+          <div class="tabela-okvir" id="pel-tabela-okvir" style="display:none">
+            <div class="tabela-skrol">
+              <table class="tab">
+                <thead><tr>
+                  <th>Element</th><th>V × Š × D (cm)</th><th class="r">Kom</th>
+                  <th class="r">m²</th><th class="r">Nabavno</th><th></th>
+                </tr></thead>
+                <tbody id="pel-telo"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ····· OKOVI ····· -->
+        <div class="podstrana" id="pod-okovi" style="display:none">
+          <div class="card">
+            <div class="kota"><span class="kota-line"></span><span class="kota-label">Automatski iz elemenata</span><span class="kota-line"></span></div>
+            <div id="pok-auto"></div>
+          </div>
+
+          <div class="alatka">
+            <div style="font-size:13px;color:var(--ink-2);max-width:520px">
+              Klizači, ručice, podizni mehanizmi — sve što motor ne može da izvuče iz dimenzija.
+            </div>
+            <button class="btn btn-primary btn-sm" id="pok-novi">Dodaj okov</button>
+          </div>
+
+          <div class="empty" id="pok-prazno">
+            <h3>Nema ručno dodatih okova</h3>
+            <p>Šarke, nosači i nogice se broje sami. Ovde ide ostalo.</p>
+          </div>
+
+          <div class="tabela-okvir" id="pok-tabela-okvir" style="display:none">
+            <div class="tabela-skrol">
+              <table class="tab">
+                <thead><tr>
+                  <th>Okov</th><th class="r">Kom</th><th class="r">Cena</th><th class="r">Iznos</th><th></th>
+                </tr></thead>
+                <tbody id="pok-telo"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:14px">
+            <div id="pok-zbir"></div>
+          </div>
+        </div>
+
+        <!-- ····· RAD ····· -->
+        <div class="podstrana" id="pod-rad" style="display:none">
+          <div class="el-mreza">
+            <form id="rad-forma">
+              <div class="card">
+                <div class="kota"><span class="kota-line"></span><span class="kota-label">Vreme</span><span class="kota-line"></span></div>
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="pr-sati">Tvoji sati na poslu</label>
+                    <input type="number" id="pr-sati" min="0" step="0.5">
+                    <div class="hint">Merenje, sečenje, kantovanje, montaža</div>
+                  </div>
+                  <div class="field">
+                    <label for="pr-pomocni-dana">Pomoćni radnik (dana)</label>
+                    <input type="number" id="pr-pomocni-dana" min="0" step="0.5">
+                    <div class="hint">Ide u trošak, ne u cenu</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="kota"><span class="kota-line"></span><span class="kota-label">Teren</span><span class="kota-line"></span></div>
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="pr-spratovi">Spratova bez lifta</label>
+                    <input type="number" id="pr-spratovi" min="0">
+                  </div>
+                  <div class="field">
+                    <label for="pr-kilometri">Udaljenost (km)</label>
+                    <input type="number" id="pr-kilometri" min="0">
+                    <div class="hint">U jednom smeru — put se računa povratno</div>
+                  </div>
+                </div>
+                <div class="field" style="max-width:calc(50% - 6px)">
+                  <label for="pr-dana-smestaj">Dana sa smeštajem</label>
+                  <input type="number" id="pr-dana-smestaj" min="0" step="0.5">
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="kota"><span class="kota-line"></span><span class="kota-label">Cena</span><span class="kota-line"></span></div>
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="pr-marza">Marža na materijal i okove (%)</label>
+                    <input type="number" id="pr-marza" min="0" max="300">
+                    <div class="hint">Prazno = podrazumevana iz Podešavanja</div>
+                  </div>
+                  <div class="field">
+                    <label for="pr-popust">Popust klijentu (%)</label>
+                    <input type="number" id="pr-popust" min="0" max="100">
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary" id="rad-dugme">Sačuvaj rad</button>
+              <div class="poruka" id="rad-poruka"></div>
+            </form>
+
+            <aside class="el-desno">
+              <div class="card">
+                <div class="kota"><span class="kota-line"></span><span class="kota-label">Tvoj cenovnik</span><span class="kota-line"></span></div>
+                <div id="rad-cenovnik"></div>
+                <div class="hint" style="margin-top:10px">Menja se u Podešavanjima i važi za sve projekte.</div>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <!-- ····· CENA ····· -->
+        <div class="podstrana" id="pod-cena" style="display:none">
+          <div class="metrike" id="cena-metrike"></div>
+
+          <div class="poruka vidljiva gre" id="cena-upozorenje" style="display:none"></div>
+
+          <div class="el-mreza" style="margin-top:14px">
+            <div>
+              <div class="card">
+                <div class="kota"><span class="kota-line"></span><span class="kota-label">Šta klijent plaća</span><span class="kota-line"></span></div>
+                <div id="cena-prihod"></div>
+              </div>
+              <div class="card">
+                <div class="kota"><span class="kota-line"></span><span class="kota-label">Šta tebe košta</span><span class="kota-line"></span></div>
+                <div id="cena-trosak"></div>
+              </div>
+            </div>
+
+            <aside class="el-desno">
+              <div class="ukupno-kutija" style="margin-top:0">
+                <div class="ukupno-labela">Ukupno projekat</div>
+                <div class="ukupno-iznos" id="cena-ukupno">—</div>
+                <div class="ukupno-detalj" id="cena-ukupno-detalj"></div>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <!-- ····· ZADACI ····· -->
+        <div class="podstrana" id="pod-zadaci" style="display:none">
+          <form class="zadatak-forma" id="pz-forma">
+            <input type="text" id="pz-tekst" placeholder="Šta te čeka na ovom poslu…" aria-label="Novi zadatak">
+            <input type="date" id="pz-rok" aria-label="Rok zadatka">
+            <button type="submit" class="btn btn-primary btn-sm">Dodaj</button>
+          </form>
+          <div class="card" id="pz-telo"></div>
+        </div>
+
+        <div class="poruka" id="pr-poruka"></div>
       </section>
 
       <!-- ---------- ELEMENT ---------- -->
       <section class="view" id="view-element" style="display:none">
+
+        <div class="veza-traka" id="veza-traka" style="display:none">
+          <div id="veza-tekst"></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" id="veza-sacuvaj">Sačuvaj izmene</button>
+            <button class="btn btn-sm" id="veza-otkazi">Otkači od projekta</button>
+          </div>
+        </div>
+
+        <div class="alatka">
+          <div style="font-size:13px;color:var(--ink-2);max-width:520px">
+            Brza računica. Kad ti se poklopi, prebaci je u projekat ili zapamti kao šablon.
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" id="el-sablon">Sačuvaj kao šablon</button>
+            <button class="btn btn-primary btn-sm" id="el-u-projekat">Dodaj u projekat</button>
+          </div>
+        </div>
+        <div class="poruka" id="el-poruka"></div>
+
         <div class="el-mreza">
 
           <div class="el-levo">

@@ -3,6 +3,7 @@
    ===================================================================== */
 
 import { db, korisnik, poruka } from './app.js';
+import { otvoriModal, zatvoriModal, vred, broj, esc } from './ui.js';
 
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -14,31 +15,6 @@ let konfiguracije = [];
 let okovi = [];
 let rabat = 0;
 let filterMaterijala = 'sve';
-
-/* ===================================================================
-   MODAL
-   =================================================================== */
-function otvoriModal(naslov, telo, naSnimi) {
-  $('#modal-naslov').textContent = naslov;
-  $('#modal-telo').innerHTML = telo;
-  $('#modal-sloj').classList.add('otvoren');
-  const snimi = $('#modal-snimi');
-  snimi.onclick = naSnimi;
-  const prvi = $('#modal-telo input, #modal-telo select');
-  if (prvi) setTimeout(() => prvi.focus(), 40);
-}
-function zatvoriModal() {
-  $('#modal-sloj').classList.remove('otvoren');
-  $('#modal-telo').innerHTML = '';
-}
-function vred(id) {
-  const el = $('#' + id);
-  return el ? el.value.trim() : '';
-}
-function broj(id) {
-  const v = vred(id);
-  return v === '' ? null : Number(v);
-}
 
 /* ===================================================================
    UČITAVANJE
@@ -429,10 +405,6 @@ async function obrisi(tabela, id, sta) {
   poruka($('#sif-poruka'), 'Obrisano.', 'ok');
 }
 
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
-}
-
 /* ===================================================================
    VEZIVANJE DUGMADI
    =================================================================== */
@@ -442,13 +414,6 @@ export function povezSifarnike() {
   $('#kon-nova').onclick   = () => formaKonfiguracije();
   $('#okov-novi').onclick  = () => formaOkova();
   $('#okov-seed').onclick  = ubaciOkove;
-
-  $('#modal-zatvori').onclick = zatvoriModal;
-  $('#modal-otkazi').onclick  = zatvoriModal;
-  $('#modal-sloj').onclick = (e) => { if (e.target.id === 'modal-sloj') zatvoriModal(); };
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && $('#modal-sloj').classList.contains('otvoren')) zatvoriModal();
-  });
 
   $$('[data-filter]').forEach(b => b.onclick = () => {
     filterMaterijala = b.dataset.filter;

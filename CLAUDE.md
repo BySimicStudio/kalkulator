@@ -24,11 +24,14 @@ Deploy: push na `main` → Vercel sam objavljuje.
 index.html          sve stranice u jednom fajlu, prikaz se prebacuje preko .view
 css/styles.css      dizajn tokeni + komponente
 js/config.js        Supabase URL i anon ključ
-js/app.js           auth, navigacija, Podešavanja; izvozi db, korisnik(), poruka()
+js/app.js           auth, navigacija, Podešavanja; izvozi db, korisnik(), poruka(), otvori()
+js/ui.js            modal i sitni pomoćnici koje dele svi ekrani
 js/sifarnik.js      materijali, konfiguracije materijala, okovi (CRUD)
 js/motor.js         PRORAČUN — čiste funkcije, bez DOM-a
 js/element.js       forma elementa, skica, izbor ivica, prikaz cene
+js/projekti.js      kanban, projekat i pet podtabova
 schema.sql          kompletna šema baze (referenca, već je pokrenuta)
+schema-faza2.sql    tabele za projekte (idempotentna, pokreće se u SQL editoru)
 ```
 
 `motor.js` mora ostati bez DOM zavisnosti — to je jedini deo koji se testira izolovano.
@@ -78,20 +81,44 @@ Ivice `gore`/`dole` nose dužinu dela, `levo`/`desno` njegovu širinu.
   vuče se iz `profili.rabat_dobavljac`.
 - Standardna tabla bele iverice: 2800 × 2070.
 
+## Rad i profit — NE MENJATI bez Filipove potvrde
+
+Sve stope dolaze iz `profili`, količine iz `projekti`. Računa `izracunajProjekat`.
+
+**Prihod** (šta klijent plaća)
+- materijal × (1 + marža) + okovi × (1 + marža)
+- rad = sati × satnica
+- logistika = spratovi × cena_sprat + put + dana_smestaj × dnevnica
+- popust se oduzima na kraju, procentom od svega gore
+
+**Put** — naplaćuje se samo preko servisnog radijusa, i to povratno
+- naplativi km = max(0, km − km_besplatno) × 2
+- stopa je `km_cena_bliza` do 80 km, `km_cena_dalja` preko 80
+
+**Trošak** (šta tebi izlazi)
+- materijal i okovi po nabavnoj ceni, sa rabatom
+- pomoćni radnik = pomocni_dana × pomocni_dnevnica
+
+**Rezultat**
+- zarada = prihod − trošak
+- efektivna satnica = zarada / sati
+- avans = (materijal + okovi) × (1 + buffer_avans)
+
+Marža na projektu koja je `null` znači: uzmi `profili.marza_default`.
+
 ## Faze
 
 Gotovo — auth i RLS, šifarnici, motor sa tipovima 1 i 2, živa skica, izbor ivica,
-izbor okova, pamćenje unosa u localStorage.
+izbor okova, pamćenje unosa u localStorage; projekti sa kanbanom i podtabovima
+Elementi / Okovi / Rad / Cena / Zadaci, šabloni elemenata, rad i profit.
+
+Projekat pamti **parametre elementa, ne iznos** — cena se svaki put izračuna kroz
+motor, pa promena cenovnika sama povuče sve projekte.
 
 Sledeće:
-1. **Projekti** — kontejner sa podtabovima: Elementi, Okovi, Rad, Cena, Zadaci.
-   Kanban `na_cekanju / u_izradi / zavrseno`. Šabloni elemenata.
-   Element tab ostaje i kao brza računica, uz dugme „Dodaj u projekat".
-2. **Rad i profit** — satnica, pomoćni radnik, sprat bez lifta, kilometri, dnevnica;
-   marža, efektivna satnica, ukupna zarada. Avans = (materijal + okovi) × (1 + buffer).
-3. **Optimizacija sečenja** — guillotine raspored, kerf 5 mm, odmak 10 mm,
+1. **Optimizacija sečenja** — guillotine raspored, kerf 5 mm, odmak 10 mm,
    vizuelni prikaz, ostaci i naplata.
-4. **Klijenti i predračun** — PDF ponuda, ugovor, garancija.
+2. **Klijenti i predračun** — PDF ponuda, ugovor, garancija.
 
 ## Konvencije
 

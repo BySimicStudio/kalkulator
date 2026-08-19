@@ -609,3 +609,196 @@ svg.ivice { display: block; }
   .izbor { grid-template-columns: 1fr; }
   .izbor.tri { grid-template-columns: 1fr; }
 }
+
+/* =====================================================================
+   FAZA 2 — projekti, podtabovi, kanban kartice
+   ===================================================================== */
+
+/* ---------- kanban ---------- */
+.kolona-telo { display: flex; flex-direction: column; gap: 8px; min-height: 150px; border-radius: var(--r); }
+.kolona-telo.meta { outline: 2px dashed var(--blueprint); outline-offset: 3px; background: var(--blueprint-soft); }
+
+.pkarta {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--ink-3);
+  border-radius: var(--r);
+  padding: 11px 12px;
+  cursor: pointer;
+  transition: border-color .12s ease, transform .12s ease;
+}
+.pkarta:hover { border-color: var(--ink-3); transform: translateY(-1px); }
+.pkarta.vuce { opacity: .45; }
+#kolona-cekanje .pkarta { border-left-color: #B58900; }
+#kolona-izrada  .pkarta { border-left-color: var(--blueprint); }
+#kolona-gotovo  .pkarta { border-left-color: var(--profit); }
+
+.pkarta-vrh { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.pkarta-naziv { font-size: 14px; font-weight: 500; line-height: 1.3; }
+.pkarta-strelice { display: flex; gap: 2px; flex-shrink: 0; }
+.pkarta-pomeri {
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--ink-3);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  padding: 3px 5px;
+  cursor: pointer;
+}
+.pkarta-pomeri:hover { background: var(--surface-2); border-color: var(--line); color: var(--ink); }
+.pkarta-klijent { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+.pkarta-brojke {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 8px;
+}
+.pkarta-cena {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink-2);
+  border-top: 1px solid var(--line-soft);
+  margin-top: 8px;
+  padding-top: 7px;
+}
+.dobro { color: var(--profit); }
+.lose  { color: var(--alert); }
+
+/* ---------- glava projekta ---------- */
+.p-glava {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.p-glava-info { flex: 1; min-width: 160px; }
+.p-glava-naziv { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+.p-glava-sub { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+.p-glava-akcije { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.p-glava-akcije select { width: auto; font-size: 13px; padding: 7px 10px; }
+.btn-opasno:hover { background: var(--alert-soft); border-color: var(--alert); color: var(--alert); }
+
+/* ---------- podtabovi ---------- */
+.podtabovi {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 18px;
+  overflow-x: auto;
+}
+.podtab {
+  position: relative;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 10px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.podtab:hover { color: var(--ink); }
+.podtab.active { color: var(--ink); border-bottom-color: var(--ink); }
+.podtab:focus-visible { outline: 2px solid var(--blueprint); outline-offset: -2px; }
+.podtab-broj {
+  font-size: 10px;
+  color: var(--ink-3);
+  background: var(--surface-2);
+  border: 1px solid var(--line-soft);
+  border-radius: 100px;
+  padding: 1px 6px;
+  margin-left: 4px;
+}
+.podtab.active .podtab-broj { background: var(--blueprint-soft); border-color: var(--blueprint-soft); color: var(--blueprint); }
+
+/* ---------- veza elementa sa projektom ---------- */
+.veza-traka {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--blueprint-soft);
+  border: 1px solid var(--blueprint);
+  border-radius: var(--r);
+  padding: 11px 14px;
+  font-size: 13px;
+  color: var(--blueprint);
+  margin-bottom: 14px;
+}
+
+/* ---------- metrike na tabu Cena ---------- */
+.metrike { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.metrika {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+}
+.metrika-labela {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.metrika-broj { font-size: 21px; font-weight: 500; margin: 4px 0 2px; }
+.metrika-sub { font-size: 11px; color: var(--ink-3); }
+
+.stav.jaka { border-top: 1px solid var(--line); border-bottom: none; margin-top: 4px; padding-top: 10px; }
+.stav.jaka b { font-size: 15px; }
+
+/* ---------- zadaci ---------- */
+.zadatak-forma { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.zadatak-forma #pz-tekst { flex: 1; min-width: 200px; }
+.zadatak-forma #pz-rok { width: auto; }
+
+.zadatak {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.zadatak:last-child { border-bottom: none; }
+.zadatak-levo { display: flex; align-items: center; gap: 10px; flex: 1; cursor: pointer; }
+.zadatak input[type=checkbox] { accent-color: var(--profit); width: 17px; height: 17px; flex-shrink: 0; }
+.zadatak-tekst { font-size: 14px; }
+.zadatak.gotov .zadatak-tekst { color: var(--ink-3); text-decoration: line-through; }
+.zadatak-rok { font-size: 11px; color: var(--ink-3); }
+
+/* ---------- sitna lista u modalu ---------- */
+.lista-sitno { font-size: 13px; color: var(--ink-2); }
+.lista-red {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.lista-red:last-child { border-bottom: none; }
+
+@media (max-width: 1000px) {
+  .metrike { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 860px) {
+  .p-glava { align-items: stretch; }
+  .p-glava-akcije { justify-content: space-between; }
+  .metrike { grid-template-columns: 1fr 1fr; }
+  .kolona { min-height: 0; }
+}

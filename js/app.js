@@ -2,6 +2,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 import { ucitajSifarnike, povezSifarnike } from './sifarnik.js';
 import { ucitajElement, povezElement } from './element.js';
+import { ucitajProjekte, povezProjekte } from './projekti.js';
+import { povezModal } from './ui.js';
 
 export const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -66,6 +68,7 @@ async function odjavi() {
    =================================================================== */
 const STRANE = {
   projekti:    { naslov: 'Projekti',    sub: 'Svi poslovi na jednom mestu' },
+  projekat:    { naslov: 'Projekat',    sub: '' },
   element:     { naslov: 'Element',     sub: 'Dimenzije ulaze, delovi i cena izlaze' },
   materijali:  { naslov: 'Materijali',  sub: 'Ploče, kant trake i konfiguracije' },
   okovi:       { naslov: 'Okovi',       sub: 'Šifarnik sa cenama po komadu' },
@@ -74,13 +77,15 @@ const STRANE = {
   podesavanja: { naslov: 'Podešavanja', sub: 'Cenovnik rada, marže i podaci firme' },
 };
 
-function otvori(strana) {
+export function otvori(strana) {
   $$('.view').forEach(v => v.style.display = 'none');
   const view = $(`#view-${strana}`);
   if (view) view.style.display = 'block';
 
-  $$('.nav-item[data-strana]').forEach(b => b.classList.toggle('active', b.dataset.strana === strana));
-  $$('.mob-item').forEach(b => b.classList.toggle('active', b.dataset.strana === strana));
+  /* Otvoren projekat živi pod stavkom Projekti u meniju */
+  const uMeniju = strana === 'projekat' ? 'projekti' : strana;
+  $$('.nav-item[data-strana]').forEach(b => b.classList.toggle('active', b.dataset.strana === uMeniju));
+  $$('.mob-item').forEach(b => b.classList.toggle('active', b.dataset.strana === uMeniju));
 
   const meta = STRANE[strana];
   if (meta) {
@@ -136,18 +141,7 @@ async function sacuvajProfil(e) {
   poruka(msg, 'Podešavanja sačuvana.', 'ok');
   await ucitajSifarnike();   // rabat se možda promenio
   await ucitajElement();
-}
-
-/* ===================================================================
-   PROJEKTI (Faza 2)
-   =================================================================== */
-async function ucitajProjekte() {
-  const { data } = await db.from('projekti').select('id, status');
-  const b = { na_cekanju: 0, u_izradi: 0, zavrseno: 0 };
-  (data || []).forEach(p => { if (b[p.status] !== undefined) b[p.status]++; });
-  $('#broj-cekanje').textContent = b.na_cekanju;
-  $('#broj-izrada').textContent  = b.u_izradi;
-  $('#broj-gotovo').textContent  = b.zavrseno;
+  await ucitajProjekte();    // satnica i marža ulaze u svaki projekat
 }
 
 /* ===================================================================
@@ -170,8 +164,10 @@ async function init() {
   $$('.nav-item[data-strana], .mob-item').forEach(b =>
     b.addEventListener('click', () => otvori(b.dataset.strana)));
   $('#odjava').addEventListener('click', odjavi);
+  povezModal();
   povezSifarnike();
   povezElement();
+  povezProjekte();
 
   const { data } = await db.auth.getSession();
   if (data.session) {
