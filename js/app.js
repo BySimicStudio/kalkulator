@@ -58,6 +58,7 @@ function prevediGresku(p) {
 async function odjavi() {
   await db.auth.signOut();
   _korisnik = null;
+  zatvoriMeni();
   $('#app').classList.remove('active');
   $('#login').style.display = 'grid';
   $('#login-lozinka').value = '';
@@ -77,6 +78,16 @@ const STRANE = {
   podesavanja: { naslov: 'Podešavanja', sub: 'Cenovnik rada, marže i podaci firme' },
 };
 
+/* ---------- meni na telefonu ---------- */
+function meni(otvoren) {
+  $('#sidebar').classList.toggle('otvoren', otvoren);
+  $('#sloj-meni').classList.toggle('vidljiv', otvoren);
+  $('#meni-dugme').classList.toggle('otvoren', otvoren);
+  $('#meni-dugme').setAttribute('aria-expanded', String(otvoren));
+  document.body.classList.toggle('meni-otvoren', otvoren);
+}
+const zatvoriMeni = () => meni(false);
+
 export function otvori(strana) {
   $$('.view').forEach(v => v.style.display = 'none');
   const view = $(`#view-${strana}`);
@@ -85,7 +96,7 @@ export function otvori(strana) {
   /* Otvoren projekat živi pod stavkom Projekti u meniju */
   const uMeniju = strana === 'projekat' ? 'projekti' : strana;
   $$('.nav-item[data-strana]').forEach(b => b.classList.toggle('active', b.dataset.strana === uMeniju));
-  $$('.mob-item').forEach(b => b.classList.toggle('active', b.dataset.strana === uMeniju));
+  zatvoriMeni();
 
   const meta = STRANE[strana];
   if (meta) {
@@ -161,9 +172,13 @@ async function pokreniAplikaciju() {
 async function init() {
   $('#login-forma').addEventListener('submit', prijavi);
   $('#pod-forma').addEventListener('submit', sacuvajProfil);
-  $$('.nav-item[data-strana], .mob-item').forEach(b =>
+  $$('.nav-item[data-strana]').forEach(b =>
     b.addEventListener('click', () => otvori(b.dataset.strana)));
   $('#odjava').addEventListener('click', odjavi);
+
+  $('#meni-dugme').addEventListener('click', () => meni(!$('#sidebar').classList.contains('otvoren')));
+  $('#sloj-meni').addEventListener('click', zatvoriMeni);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') zatvoriMeni(); });
   povezModal();
   povezSifarnike();
   povezElement();

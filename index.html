@@ -36,7 +36,9 @@
 <!-- ================= APLIKACIJA ================= -->
 <div class="app" id="app">
 
-  <aside class="sidebar">
+  <div class="sloj-meni" id="sloj-meni"></div>
+
+  <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="brand-name">By Simic Studio</div>
       <div class="brand-sub">NAMEŠTAJ PO MERI</div>
@@ -60,6 +62,9 @@
 
   <main class="main">
     <header class="topbar">
+      <button class="meni-dugme" id="meni-dugme" aria-label="Meni" aria-expanded="false" aria-controls="sidebar">
+        <span></span><span></span><span></span>
+      </button>
       <div>
         <h1 id="page-naslov">Projekti</h1>
         <div class="page-sub" id="page-sub"></div>
@@ -727,12 +732,6 @@
     </div>
   </main>
 
-  <nav class="mob-nav">
-    <button class="mob-item" data-strana="projekti">Projekti</button>
-    <button class="mob-item" data-strana="element">Element</button>
-    <button class="mob-item" data-strana="okovi">Okovi</button>
-    <button class="mob-item" data-strana="podesavanja">Podešavanja</button>
-  </nav>
 </div>
 
 <!-- ================= MODAL ================= -->

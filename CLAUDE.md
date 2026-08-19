@@ -127,6 +127,11 @@ Sledeće:
   dokumentacija: grafit, vellum, blueprint plava, `.kota` kao potpis sekcije.
 - Svi brojevi u interfejsu nose klasu `.num` (mono, tabelarne cifre).
 - Dimenzije se računaju u mm, prikazuju u cm sa jednom decimalom.
+- Na telefonu je meni **ista ona bočna traka**, izvučena sa strane hamburger
+  dugmetom (`#meni-dugme`, `.sidebar.otvoren`). Ne praviti zasebnu donju traku —
+  imala je svoj kraći spisak stavki, pa su Materijali umeli da fale.
+- Prelom je na 860 px. Tabele klize vodoravno unutar `.tabela-skrol`, sve ostalo
+  mora da stane u širinu ekrana.
 
 ## Ne raditi
 
