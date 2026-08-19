@@ -188,7 +188,7 @@
             </div>
 
             <div class="card">
-              <div class="kota"><span class="kota-line"></span><span class="kota-label">Krila i leđa</span><span class="kota-line"></span></div>
+              <div class="kota"><span class="kota-line"></span><span class="kota-label">Krila</span><span class="kota-line"></span></div>
               <div class="izbor tri">
                 <label><input type="radio" name="krilo" value="bez" checked><span>Bez krila</span></label>
                 <label><input type="radio" name="krilo" value="jednodelno"><span>Jednodelno</span></label>
@@ -199,8 +199,45 @@
                 <input type="number" id="e-krilo-zazor" value="2.5" min="0" step="0.5">
                 <div class="hint">Isti sa svih strana i na sredini</div>
               </div>
-              <label class="prekidac"><input type="checkbox" id="e-leda" checked> Leđa — visina × širina, bez kanta</label>
-              <label class="prekidac"><input type="checkbox" id="e-nogice"> Nogice — 4 po elementu</label>
+            </div>
+
+            <div class="card">
+              <div class="kota"><span class="kota-line"></span><span class="kota-label">Leđa</span><span class="kota-line"></span></div>
+              <div class="izbor tri">
+                <label><input type="radio" name="leda" value="bez"><span>Bez leđa</span></label>
+                <label><input type="radio" name="leda" value="hdf" checked><span>HDF — naleže spolja</span></label>
+                <label><input type="radio" name="leda" value="puna"><span>Puna — upadaju unutra</span></label>
+              </div>
+              <div class="field" style="max-width:calc(50% - 6px);margin-top:12px" id="red-leda-zazor">
+                <label for="e-leda-zazor">Zazor HDF-a (mm)</label>
+                <input type="number" id="e-leda-zazor" value="2" min="0" step="0.5">
+                <div class="hint">Sa svake strane, obično 1–3 mm</div>
+              </div>
+              <div class="field" style="max-width:calc(50% - 6px);margin-top:12px;display:none" id="red-leda-debljina">
+                <label for="e-leda-debljina">Debljina punih leđa (mm)</label>
+                <input type="number" id="e-leda-debljina" value="18" min="1">
+              </div>
+              <div class="hint" id="nota-leda" style="margin-top:8px"></div>
+            </div>
+
+            <div class="card">
+              <div class="kota"><span class="kota-line"></span><span class="kota-label">Okovi</span><span class="kota-line"></span></div>
+              <div class="field">
+                <label for="e-okov-sarka">Šarka</label>
+                <select id="e-okov-sarka"></select>
+                <div class="hint">2 komada po krilu</div>
+              </div>
+              <div class="field">
+                <label for="e-okov-nosac">Nosač police</label>
+                <select id="e-okov-nosac"></select>
+                <div class="hint">4 komada po pomičnoj polici</div>
+              </div>
+              <div class="field">
+                <label for="e-okov-nogica">Nogica</label>
+                <select id="e-okov-nogica"></select>
+                <div class="hint">4 komada po elementu</div>
+              </div>
+              <label class="prekidac"><input type="checkbox" id="e-nogice"> Element ima nogice</label>
             </div>
           </div>
 
@@ -235,7 +272,10 @@
           <div class="kota" style="margin:0;flex:1">
             <span class="kota-line"></span><span class="kota-label">Delovi</span><span class="kota-line"></span>
           </div>
-          <button class="btn btn-sm" id="kant-reset">Vrati podrazumevane ivice</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" id="element-reset">Isprazni element</button>
+            <button class="btn btn-sm" id="kant-reset">Vrati podrazumevane ivice</button>
+          </div>
         </div>
 
         <div class="tabela-okvir">
