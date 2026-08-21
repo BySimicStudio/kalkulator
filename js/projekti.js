@@ -18,6 +18,18 @@ const STATUSI = ['na_cekanju', 'u_izradi', 'zavrseno'];
 const IME_STATUSA = { na_cekanju: 'Na čekanju', u_izradi: 'U izradi', zavrseno: 'Završeno' };
 const KOLONA_ID   = { na_cekanju: 'cekanje', u_izradi: 'izrada', zavrseno: 'gotovo' };
 
+/* Tok posla, redom kojim se dešava. `auto` znači da aplikacija upiše
+   današnji datum kad posao pređe u taj status — ali samo ako je polje
+   prazno, da nikad ne pregazi ono što je Filip sam upisao.              */
+const ROKOVI = [
+  { kolona: 'datum_merenja',     ime: 'Merenje' },
+  { kolona: 'datum_porucivanja', ime: 'Poručivanje materijala' },
+  { kolona: 'datum_pocetka',     ime: 'Početak izrade', auto: 'u_izradi' },
+  { kolona: 'datum_montaze',     ime: 'Montaža' },
+  { kolona: 'datum_zavrsetka',   ime: 'Završetak',      auto: 'zavrseno' },
+];
+const idRoka = (kolona) => 'pr-' + kolona.replace(/_/g, '-');
+
 /* ------------------------------ stanje ------------------------------ */
 let projekti = [];
 let sviElementi = [];      // elementi svih projekata — kanban računa iz njih
@@ -210,6 +222,7 @@ function crtajKanban() {
 
 function kartaProjekta(p) {
   const z = zbirProjekta(p);
+  const korak = sledeciKorak(p);
   const i = STATUSI.indexOf(p.status);
   const strelica = (smer, znak) => {
     const cilj = STATUSI[i + smer];
@@ -228,7 +241,7 @@ function kartaProjekta(p) {
     <div class="pkarta-brojke">
       <span class="num">${z.elementi.length} el.</span>
       <span class="num">${z.m2.toFixed(2)} m²</span>
-      ${p.rok ? `<span class="num">rok ${datum(p.rok)}</span>` : ''}
+      ${korak ? `<span class="num ${korak.kasni ? 'lose' : ''}">${esc(korak.tekst)}</span>` : ''}
     </div>
     <div class="pkarta-cena">
       <span class="num">${rsd(z.racun.prihod.ukupno)} RSD</span>
@@ -237,14 +250,77 @@ function kartaProjekta(p) {
   </article>`;
 }
 
-function datum(d) {
-  if (!d) return '';
-  const x = new Date(d);
-  return `${x.getDate()}.${x.getMonth() + 1}.`;
+/* ===================================================================
+   DATUMI
+   Sve ide po lokalnom danu, ne po UTC — u avgustu smo dva sata ispred,
+   pa bi toISOString() pre dva ujutru upisao jučerašnji datum.
+   =================================================================== */
+function danasISO() {
+  const d = new Date();
+  const p = (x) => String(x).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+/* Koliko dana od danas do datuma: negativno je prošlost, 0 je danas. */
+function danaDo(iso) {
+  if (!iso) return null;
+  const [g, m, d] = iso.split('-').map(Number);
+  const cilj = new Date(g, m - 1, d);
+  const sad = new Date();
+  const danas = new Date(sad.getFullYear(), sad.getMonth(), sad.getDate());
+  return Math.round((cilj - danas) / 86400000);
+}
+
+function datum(iso) {
+  if (!iso) return '';
+  const [g, m, d] = iso.split('-').map(Number);
+  return `${d}.${m}.`;
+}
+
+function datumPun(iso) {
+  if (!iso) return '';
+  const [g, m, d] = iso.split('-').map(Number);
+  return `${d}.${m}.${g}.`;
+}
+
+const dan = (n) => (Math.abs(n) % 10 === 1 && Math.abs(n) % 100 !== 11) ? 'dan' : 'dana';
+
+function kada(iso) {
+  const n = danaDo(iso);
+  if (n === null) return '';
+  if (n === 0) return 'danas';
+  if (n === 1) return 'sutra';
+  if (n === -1) return 'juče';
+  return n > 0 ? `za ${n} ${dan(n)}` : `pre ${-n} ${dan(n)}`;
+}
+
+/* Prvi datum koji tek dolazi — to je ono što stoji na kartici. */
+function sledeciKorak(p) {
+  const buduci = ROKOVI
+    .filter(r => p[r.kolona] && danaDo(p[r.kolona]) >= 0)
+    .sort((a, b) => p[a.kolona] < p[b.kolona] ? -1 : 1)[0];
+
+  if (buduci) return { tekst: `${buduci.ime.toLowerCase()} ${datum(p[buduci.kolona])}`, kasni: false };
+
+  if (p.rok && p.status !== 'zavrseno') {
+    const n = danaDo(p.rok);
+    return { tekst: `rok ${datum(p.rok)}`, kasni: n < 0 };
+  }
+  if (p.datum_zavrsetka) return { tekst: `gotovo ${datum(p.datum_zavrsetka)}`, kasni: false };
+  return null;
 }
 
 async function promeniStatus(id, status) {
-  const { error } = await db.from('projekti').update({ status }).eq('id', id);
+  const p = projekti.find(x => x.id == id);
+  const izmene = { status };
+
+  /* Datum početka i završetka se upisuju sami — ali ne diraju ono
+     što je već upisano, ni kad se posao vrati u raniju kolonu.        */
+  ROKOVI.filter(r => r.auto === status).forEach(r => {
+    if (!p || !p[r.kolona]) izmene[r.kolona] = danasISO();
+  });
+
+  const { error } = await db.from('projekti').update(izmene).eq('id', id);
   if (error) return poruka($('#projekti-poruka'), 'Nije prebačeno: ' + error.message, 'gre');
   await ucitajProjekte();
 }
@@ -334,9 +410,10 @@ function crtajProjekat() {
 
   $('#page-sub').textContent = IME_STATUSA[aktivan.status] || '';
   $('#pr-naziv').textContent = aktivan.naziv;
+  const korak = sledeciKorak(aktivan);
   $('#pr-sub').textContent = [
     aktivan.klijent, aktivan.adresa, aktivan.telefon,
-    aktivan.rok ? 'rok ' + aktivan.rok : null,
+    korak ? korak.tekst : null,
   ].filter(Boolean).join(' · ');
   $('#pr-status').value = aktivan.status;
 
@@ -347,6 +424,7 @@ function crtajProjekat() {
   crtajElemente(z);
   crtajOkove(z);
   crtajRad();
+  crtajRokove();
   crtajCenu(z);
   crtajZadatke();
   prikaziPodtab(podtab);
@@ -726,6 +804,82 @@ async function sacuvajRad(e) {
 }
 
 /* ===================================================================
+   PODTAB — ROKOVI
+   =================================================================== */
+function crtajRokove() {
+  ROKOVI.forEach(r => {
+    const el = $('#' + idRoka(r.kolona));
+    if (el) el.value = aktivan[r.kolona] || '';
+  });
+  $('#pr-rok').value = aktivan.rok || '';
+
+  /* --- vremeplov --- */
+  $('#rokovi-vremeplov').innerHTML = ROKOVI.map(r => {
+    const d = aktivan[r.kolona];
+    const n = danaDo(d);
+    const stanje = !d ? 'prazan' : n < 0 ? 'prosao' : n === 0 ? 'danas' : 'buduci';
+    return `<div class="korak ${stanje}">
+      <i class="korak-tacka"></i>
+      <div class="korak-ime">${r.ime}${r.auto ? '<span class="korak-auto">sam</span>' : ''}</div>
+      <div class="korak-datum num">${d ? datumPun(d) : '—'}</div>
+      <div class="korak-kad">${d ? kada(d) : 'nije zakazano'}</div>
+    </div>`;
+  }).join('') + (aktivan.rok ? `<div class="korak rok ${danaDo(aktivan.rok) < 0 && aktivan.status !== 'zavrseno' ? 'prosao' : ''}">
+      <i class="korak-tacka"></i>
+      <div class="korak-ime">Ugovoreni rok</div>
+      <div class="korak-datum num">${datumPun(aktivan.rok)}</div>
+      <div class="korak-kad">${kada(aktivan.rok)}</div>
+    </div>` : '');
+
+  /* --- rečenica koja kaže gde si --- */
+  const poceo = aktivan.datum_pocetka;
+  const gotov = aktivan.datum_zavrsetka;
+  const redovi = [];
+
+  if (poceo && gotov) {
+    const trajanje = Math.max(0, danaDo(gotov) - danaDo(poceo));
+    redovi.push(['dobro', `Posao je trajao ${trajanje} ${dan(trajanje)} — od ${datumPun(poceo)} do ${datumPun(gotov)}.`]);
+  } else if (poceo) {
+    const proslo = -danaDo(poceo);
+    redovi.push(['', proslo < 0
+      ? `Početak je zakazan za ${datumPun(poceo)} — ${kada(poceo)}.`
+      : proslo === 0
+        ? 'Posao je počeo danas.'
+        : `Posao je počeo ${datumPun(poceo)} — traje ${proslo} ${dan(proslo)}.`]);
+  } else {
+    redovi.push(['', 'Posao još nije počeo. Datum početka se upiše sam kad ga prebaciš u izradu.']);
+  }
+
+  if (aktivan.rok && !gotov) {
+    const n = danaDo(aktivan.rok);
+    redovi.push(n < 0
+      ? ['lose', `Ugovoreni rok je prošao pre ${-n} ${dan(n)}.`]
+      : ['', `Do ugovorenog roka ${n === 0 ? 'je danas' : `ima ${n} ${dan(n)}`}.`]);
+  }
+
+  $('#rokovi-sazetak').innerHTML = redovi
+    .map(([k, t]) => `<div class="rok-red ${k}">${t}</div>`).join('');
+}
+
+async function sacuvajRokove(e) {
+  e.preventDefault();
+  if (!aktivan) return;
+
+  const izmene = { rok: $('#pr-rok').value || null };
+  ROKOVI.forEach(r => { izmene[r.kolona] = $('#' + idRoka(r.kolona)).value || null; });
+
+  const dugme = $('#rokovi-dugme');
+  dugme.disabled = true;
+  const { error } = await db.from('projekti').update(izmene).eq('id', aktivan.id);
+  dugme.disabled = false;
+
+  if (error) return poruka($('#rokovi-poruka'), 'Nije sačuvano: ' + error.message, 'gre');
+  Object.assign(aktivan, izmene);
+  await ucitajProjekte();
+  poruka($('#rokovi-poruka'), 'Datumi sačuvani.', 'ok');
+}
+
+/* ===================================================================
    PODTAB — CENA
    =================================================================== */
 function crtajCenu(z) {
@@ -886,6 +1040,7 @@ export function povezProjekte() {
   $('#pel-sablon').onclick = izSablona;
   $('#pok-novi').onclick   = formaRucnogOkova;
   $('#rad-forma').addEventListener('submit', sacuvajRad);
+  $('#rokovi-forma').addEventListener('submit', sacuvajRokove);
   $('#pz-forma').addEventListener('submit', dodajZadatak);
 
   /* Element tab → projekat */

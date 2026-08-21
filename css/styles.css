@@ -793,6 +793,70 @@ svg.ivice { display: block; }
 .stav.jaka { border-top: 1px solid var(--line); border-bottom: none; margin-top: 4px; padding-top: 10px; }
 .stav.jaka b { font-size: 15px; }
 
+/* ---------- vremeplov na tabu Rokovi ---------- */
+.rok-red {
+  font-size: 13px;
+  color: var(--ink-2);
+  background: var(--surface-2);
+  border-radius: var(--r);
+  padding: 9px 11px;
+  margin-bottom: 8px;
+}
+.rok-red.dobro { background: var(--profit-soft); color: var(--profit); }
+.rok-red.lose  { background: var(--alert-soft);  color: var(--alert); }
+
+.korak {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 10px;
+  padding: 9px 0 9px 22px;
+}
+/* linija koja spaja tačke — ne ide ispod poslednje */
+.korak::before {
+  content: '';
+  position: absolute;
+  left: 4.5px;
+  top: 18px;
+  bottom: -9px;
+  width: 1px;
+  background: var(--line);
+}
+.korak:last-child::before { display: none; }
+
+.korak-tacka {
+  position: absolute;
+  left: 0;
+  top: 13px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--surface);
+}
+.korak.prosao .korak-tacka { background: var(--ink-3); border-color: var(--ink-3); }
+.korak.danas  .korak-tacka { background: var(--blueprint); border-color: var(--blueprint); box-shadow: 0 0 0 3px var(--blueprint-soft); }
+.korak.buduci .korak-tacka { border-color: var(--blueprint); }
+.korak.rok.prosao .korak-tacka { background: var(--alert); border-color: var(--alert); }
+
+.korak-ime { font-size: 13px; color: var(--ink); display: flex; align-items: center; gap: 6px; }
+.korak.prazan .korak-ime { color: var(--ink-3); }
+.korak-auto {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 0 4px;
+}
+.korak-datum { font-size: 12px; color: var(--ink-2); text-align: right; }
+.korak.prazan .korak-datum { color: var(--ink-3); }
+.korak-kad { font-size: 11px; color: var(--ink-3); grid-column: 1 / -1; }
+.korak.danas .korak-kad { color: var(--blueprint); font-weight: 500; }
+.korak.rok.prosao .korak-kad { color: var(--alert); font-weight: 500; }
+
 /* ---------- zadaci ---------- */
 .zadatak-forma { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
 .zadatak-forma #pz-tekst { flex: 1; min-width: 200px; }
@@ -832,8 +896,8 @@ svg.ivice { display: block; }
   /* svih pet podtabova mora da stane bez skrolovanja */
   .podtabovi { gap: 0; scrollbar-width: none; }
   .podtabovi::-webkit-scrollbar { display: none; }
-  .podtab { padding: 9px 8px; font-size: 12.5px; }
-  .podtab-broj { margin-left: 3px; padding: 1px 4px; font-size: 9px; }
+  .podtab { padding: 10px 5px; font-size: 12.5px; }
+  .podtab-broj { margin-left: 2px; padding: 1px 3px; font-size: 9px; }
 
   .p-glava { align-items: stretch; padding: 12px 14px; gap: 10px; }
   .p-glava-naziv { font-size: 16px; }

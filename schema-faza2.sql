@@ -65,6 +65,15 @@ alter table public.projekti add column if not exists dana_smestaj   numeric     
 alter table public.projekti add column if not exists marza          numeric;
 alter table public.projekti add column if not exists popust         numeric     not null default 0;
 
+-- rokovi (tab „Rokovi") — tok posla od merenja do završetka.
+-- datum_pocetka i datum_zavrsetka aplikacija upiše sama kad prebaciš status,
+-- ali samo ako su prazni: ono što si ručno upisao nikad ne pregazi.
+alter table public.projekti add column if not exists datum_merenja      date;
+alter table public.projekti add column if not exists datum_porucivanja  date;
+alter table public.projekti add column if not exists datum_pocetka      date;
+alter table public.projekti add column if not exists datum_montaze      date;
+alter table public.projekti add column if not exists datum_zavrsetka    date;
+
 alter table public.projekti
   drop constraint if exists projekti_status_check;
 alter table public.projekti

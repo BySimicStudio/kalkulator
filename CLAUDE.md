@@ -110,7 +110,13 @@ Marža na projektu koja je `null` znači: uzmi `profili.marza_default`.
 
 Gotovo — auth i RLS, šifarnici, motor sa tipovima 1 i 2, živa skica, izbor ivica,
 izbor okova, pamćenje unosa u localStorage; projekti sa kanbanom i podtabovima
-Elementi / Okovi / Rad / Cena / Zadaci, šabloni elemenata, rad i profit.
+Elementi / Okovi / Rad / Rokovi / Cena / Zadaci, šabloni elemenata, rad i profit.
+
+**Rokovi** — merenje, poručivanje, početak izrade, montaža, završetak, plus
+ugovoreni `rok`. Datum početka i završetka aplikacija upiše sama kad posao pređe
+u `u_izradi` odnosno `zavrseno`, ali **samo ako je polje prazno** — ručni unos se
+nikad ne pregazi, ni kad se posao vrati u raniju kolonu. Sve po lokalnom danu,
+ne po UTC, jer bi `toISOString()` pre dva ujutru upisao jučerašnji datum.
 
 Projekat pamti **parametre elementa, ne iznos** — cena se svaki put izračuna kroz
 motor, pa promena cenovnika sama povuče sve projekte.

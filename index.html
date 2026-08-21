@@ -135,6 +135,7 @@
           <button class="podtab active" data-podtab="elementi">Elementi <span class="podtab-broj num" id="pt-broj-elementi">0</span></button>
           <button class="podtab" data-podtab="okovi">Okovi <span class="podtab-broj num" id="pt-broj-okovi">0</span></button>
           <button class="podtab" data-podtab="rad">Rad</button>
+          <button class="podtab" data-podtab="rokovi">Rokovi</button>
           <button class="podtab" data-podtab="cena">Cena</button>
           <button class="podtab" data-podtab="zadaci">Zadaci <span class="podtab-broj num" id="pt-broj-zadaci">0</span></button>
         </div>
@@ -267,6 +268,65 @@
                 <div class="kota"><span class="kota-line"></span><span class="kota-label">Tvoj cenovnik</span><span class="kota-line"></span></div>
                 <div id="rad-cenovnik"></div>
                 <div class="hint" style="margin-top:10px">Menja se u Podešavanjima i važi za sve projekte.</div>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <!-- ····· ROKOVI ····· -->
+        <div class="podstrana" id="pod-rokovi" style="display:none">
+          <div class="el-mreza">
+            <form id="rokovi-forma">
+              <div class="card">
+                <div class="kota"><span class="kota-line"></span><span class="kota-label">Priprema</span><span class="kota-line"></span></div>
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="pr-datum-merenja">Merenje kod klijenta</label>
+                    <input type="date" id="pr-datum-merenja">
+                  </div>
+                  <div class="field">
+                    <label for="pr-datum-porucivanja">Poručivanje materijala</label>
+                    <input type="date" id="pr-datum-porucivanja">
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="kota"><span class="kota-line"></span><span class="kota-label">Izrada i montaža</span><span class="kota-line"></span></div>
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="pr-datum-pocetka">Početak izrade</label>
+                    <input type="date" id="pr-datum-pocetka">
+                    <div class="hint">Upiše se sam kad posao prebaciš u izradu</div>
+                  </div>
+                  <div class="field">
+                    <label for="pr-datum-montaze">Montaža</label>
+                    <input type="date" id="pr-datum-montaze">
+                  </div>
+                </div>
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="pr-datum-zavrsetka">Završetak</label>
+                    <input type="date" id="pr-datum-zavrsetka">
+                    <div class="hint">Upiše se sam kad posao označiš kao završen</div>
+                  </div>
+                  <div class="field">
+                    <label for="pr-rok">Ugovoreni rok</label>
+                    <input type="date" id="pr-rok">
+                    <div class="hint">Ono što si obećao klijentu</div>
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary" id="rokovi-dugme">Sačuvaj datume</button>
+              <div class="poruka" id="rokovi-poruka"></div>
+            </form>
+
+            <aside class="el-desno">
+              <div class="card">
+                <div class="kota"><span class="kota-line"></span><span class="kota-label">Tok posla</span><span class="kota-line"></span></div>
+                <div id="rokovi-sazetak"></div>
+                <div id="rokovi-vremeplov"></div>
               </div>
             </aside>
           </div>
