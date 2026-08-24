@@ -171,6 +171,15 @@
 
           <div class="card" id="pel-table" style="display:none">
             <div class="kota"><span class="kota-line"></span><span class="kota-label">Table i sečenje</span><span class="kota-line"></span></div>
+            <div class="alatka">
+              <div style="font-size:13px;color:var(--ink-2);max-width:460px">
+                Parametri reza se menjaju u Podešavanjima i važe za sve projekte.
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-sm" id="pel-csv">Izvezi CSV</button>
+                <button class="btn btn-sm" id="pel-stampa">Krojna lista — PDF</button>
+              </div>
+            </div>
             <div class="tabela-skrol">
               <table class="tab">
                 <thead><tr>
@@ -798,6 +807,27 @@
             </div>
           </div>
 
+          <div class="card">
+            <div class="kota"><span class="kota-line"></span><span class="kota-label">Sečenje</span><span class="kota-line"></span></div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="p-kerf">Debljina reza — kerf (mm)</label>
+                <input type="number" id="p-kerf" min="0" max="20" step="0.1">
+                <div class="hint">Koliko testera pojede po rezu. Obično 4–5 mm.</div>
+              </div>
+              <div class="field">
+                <label for="p-odmak_table">Odmak od ivice table (mm)</label>
+                <input type="number" id="p-odmak_table" min="0" max="50">
+                <div class="hint">Fabrička ivica nije prava, pa se skida sa sve četiri strane.</div>
+              </div>
+            </div>
+            <div class="field" style="max-width:calc(50% - 6px)">
+              <label for="p-min_ostatak">Najmanji ostatak koji čuvaš (mm)</label>
+              <input type="number" id="p-min_ostatak" min="0" max="2000">
+              <div class="hint">Komad manji od ovoga se broji kao škart, veći kao zaliha za sledeći posao.</div>
+            </div>
+          </div>
+
           <button type="submit" class="btn btn-primary" id="pod-dugme">Sačuvaj podešavanja</button>
           <div class="poruka" id="pod-poruka"></div>
         </form>
@@ -807,6 +837,9 @@
   </main>
 
 </div>
+
+<!-- ================= ZA ŠTAMPU ================= -->
+<div id="stampa"></div>
 
 <!-- ================= MODAL ================= -->
 <div class="modal-sloj" id="modal-sloj">

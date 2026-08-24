@@ -84,7 +84,11 @@ Ivice `gore`/`dole` nose dužinu dela, `levo`/`desno` njegovu širinu.
 
 ## Sečenje — NE MENJATI bez Filipove potvrde
 
-- Rez testere (kerf) **5 mm**, odmak od ivice table **10 mm sa sve četiri strane**.
+- Rez testere (kerf), odmak od ivice table i najmanji ostatak koji se čuva stoje na
+  `profili` (`kerf` 5, `odmak_table` 10, `min_ostatak` 300) i menjaju se u
+  Podešavanjima. Podrazumevane vrednosti su i dalje 5 / 10 mm.
+- Ostatak koji je u **obe mere** veći od praga vodi se kao zaliha, ispod praga kao
+  škart. Provera koja mora da važi: delovi + ostaci + škart = površina tabli.
 - **Tekstura** je osobina materijala (`materijali.tekstura`). Ploča sa šarom se pri
   sečenju ne okreće — delovi idu samo u jednom pravcu. Bela i jednobojna se okreću
   slobodno. Razlika nije mala: ista krila znaju da traže tablu više.
@@ -143,7 +147,11 @@ motor, pa promena cenovnika sama povuče sve projekte.
 
 **Sečenje** — guillotine raspored sa vizuelnim prikazom table, broj tabli i otpad
 po materijalu, cena po m² i po celim tablama. Vidi se u projektu, podtab Elementi,
-kartica „Table i sečenje".
+kartica „Table i sečenje". Parametri reza se menjaju u Podešavanjima.
+
+**Izvoz krojne liste** — CSV (tačka-zarez, BOM, standardna lista delova sa kantom
+po ivicama) i štampa preko `@media print`, odakle ide „Sačuvaj kao PDF". Bez
+biblioteka i bez build koraka. Format CSV-a još nije proveren na mašini u DrvoLux-u.
 
 Sledeće:
 1. **Zalihe viškova** — šta je ostalo od prethodnih poslova i može da se upotrebi

@@ -120,6 +120,7 @@ const POLJA = [
   'satnica', 'pomocni_dnevnica', 'cena_sprat', 'dnevnica',
   'km_besplatno', 'km_cena_bliza', 'km_cena_dalja',
   'marza_default', 'buffer_avans', 'rabat_dobavljac',
+  'kerf', 'odmak_table', 'min_ostatak',
 ];
 
 async function ucitajProfil() {

@@ -290,6 +290,7 @@ export function izracunajProjekat({ materijal = 0, okovi = 0, rad = {}, profil =
    ===================================================================== */
 export const KERF  = 5;
 export const ODMAK = 10;
+export const MIN_OSTATAK = 300;          // ispod ovoga komad više nije za upotrebu
 export const TABLA_PODRAZUMEVANA = { duzina: 2800, sirina: 2070 };
 
 /* Slobodan pravougaonik se posle postavljanja dela cepa na dva.
@@ -401,6 +402,18 @@ function trakePakovanje(komadi, korisnaW, korisnaH, odmak, kerf, rotacija, kakoO
     table.push(t);
   });
 
+  /* Ono što je ostalo: rep svake trake i pojas ispod poslednje.
+     Trebaju nam kao pravougaonici, da bi se videlo šta je iskoristivo. */
+  table.forEach(t => {
+    t.slobodni = [];
+    t.trake.forEach(tr => {
+      const w = odmak + korisnaW - tr.x;
+      if (w > 0.001 && tr.h > 0.001) t.slobodni.push({ x: tr.x, y: tr.y, w, h: tr.h });
+    });
+    const h = odmak + korisnaH - t.visina;
+    if (h > 0.001) t.slobodni.push({ x: odmak, y: t.visina, w: korisnaW, h });
+  });
+
   return table;
 }
 
@@ -443,14 +456,27 @@ export function spakujDelove(delovi, ploca = TABLA_PODRAZUMEVANA, opcije = {}) {
 
   const table = kandidati.reduce((a, b) => (b.length < a.length ? b : a));
 
-  const povrsinaDelova = komadi.reduce((s, k) => s + k.duzina * k.sirina, 0) / 1e6;
-  const povrsinaTabli  = table.length * (ploca.duzina * ploca.sirina) / 1e6;
+  /* Ostatak koji je u obe mere veći od praga vredi zadržati — to je
+     zaliha za sledeći posao, ne škart.                                 */
+  const minOstatak = opcije.minOstatak ?? MIN_OSTATAK;
+  const ostaci = [];
+  table.forEach((t, i) => (t.slobodni || []).forEach(s => {
+    if (Math.min(s.w, s.h) >= minOstatak) {
+      ostaci.push({ tabla: i, duzina: Math.round(s.w), sirina: Math.round(s.h) });
+    }
+  }));
+
+  const povrsinaDelova  = komadi.reduce((s, k) => s + k.duzina * k.sirina, 0) / 1e6;
+  const povrsinaTabli   = table.length * (ploca.duzina * ploca.sirina) / 1e6;
+  const povrsinaOstataka = ostaci.reduce((s, o) => s + o.duzina * o.sirina, 0) / 1e6;
 
   return {
-    table, nestali, ploca,
+    table, nestali, ploca, ostaci,
     brojTabli: table.length,
     m2Delova: povrsinaDelova,
     m2Tabli: povrsinaTabli,
+    m2Ostataka: povrsinaOstataka,
+    m2Skarta: Math.max(0, povrsinaTabli - povrsinaDelova - povrsinaOstataka),
     otpadProcenat: povrsinaTabli ? ((povrsinaTabli - povrsinaDelova) / povrsinaTabli) * 100 : 0,
   };
 }

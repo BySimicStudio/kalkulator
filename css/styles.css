@@ -947,9 +947,73 @@ svg.ivice { display: block; }
 
   /* prst nije miš — sitna dugmad dobijaju pristojnu metu za dodir */
   .ikona-btn { padding: 8px 10px; font-size: 12.5px; }
+  .btn-sm { padding: 9px 13px; }
   .pkarta { padding: 13px 14px; }
   .pkarta-pomeri { padding: 7px 11px; font-size: 14px; }
   .pkarta-naziv { font-size: 15px; }
   .cip { padding: 8px 14px; }
   .zadatak { padding: 11px 0; }
+}
+
+/* =====================================================================
+   ŠTAMPA — krojna lista
+   PDF se dobija iz dijaloga za štampu, „Sačuvaj kao PDF".
+   ===================================================================== */
+#stampa { display: none; }
+
+@media print {
+  @page { margin: 12mm; size: A4 portrait; }
+
+  body { background: #fff; font-size: 11px; }
+  body.stampanje .app,
+  body.stampanje .modal-sloj,
+  body.stampanje .login-screen { display: none !important; }
+  body.stampanje #stampa { display: block; }
+
+  .stampa-glava {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    border-bottom: 1.5px solid #14171A;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+  }
+  .stampa-firma { font-size: 14px; font-weight: 600; }
+  .stampa-desno { text-align: right; }
+  .stampa-naslov {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .stampa-sitno { font-size: 10px; color: #4A5560; }
+  .stampa-uslovi { font-size: 10px; color: #4A5560; margin-bottom: 14px; }
+
+  .stampa-blok { break-inside: avoid; margin-bottom: 16px; }
+  .stampa-blok h3 {
+    font-size: 11.5px;
+    font-weight: 600;
+    background: #F3F6F8;
+    border-left: 3px solid #14171A;
+    padding: 4px 8px;
+    margin-bottom: 6px;
+  }
+
+  .stampa-tabela { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+  .stampa-tabela th {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    text-align: left;
+    border-bottom: 1px solid #14171A;
+    padding: 3px 6px;
+  }
+  .stampa-tabela td { padding: 3px 6px; border-bottom: 1px solid #E3E9ED; }
+  .stampa-tabela .r { text-align: right; }
+
+  /* crtež table deli isti kod kao na ekranu, samo bez boja ekrana */
+  #stampa .tabla-crtez { break-inside: avoid; margin-bottom: 10px; max-width: 150mm; }
+  #stampa .tabla-glava { font-size: 9px; color: #4A5560; }
+  #stampa .tabla-crtez svg { border: 1px solid #CFD7DE; }
 }

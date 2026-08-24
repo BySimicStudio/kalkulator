@@ -487,6 +487,14 @@ function crtajElemente(z) {
    materijal iz raznih elemenata seče sa istih tabli. Cena po m² ostaje
    ono što DrvoLux naplati kad zadrži višak; cena celih tabli je koliko
    bi bilo da viškove uzimaš sebi.                                       */
+function parametriSecenja() {
+  return {
+    kerf:       profil.kerf ?? undefined,
+    odmak:      profil.odmak_table ?? undefined,
+    minOstatak: profil.min_ostatak ?? undefined,
+  };
+}
+
 function planZaProjekat(z) {
   const stavke = [];
   z.elementi.forEach(e => {
@@ -494,10 +502,10 @@ function planZaProjekat(z) {
     if (!mat) return;
     generisiDelove(e.parametri || {}).forEach(deo => {
       const m = mat[deo.grupa];
-      if (m) stavke.push({ deo, materijal: m });
+      if (m) stavke.push({ deo, materijal: m, element: e.naziv });
     });
   });
-  return planSecenja(stavke, rabat());
+  return planSecenja(stavke, rabat(), parametriSecenja());
 }
 
 function crtajTable(z) {
@@ -523,12 +531,17 @@ function crtajTable(z) {
   const poM2 = plan.reduce((s, p) => s + p.cenaPoM2, 0);
   const poTablama = plan.reduce((s, p) => s + p.cenaPoTablama, 0);
   const nestali = plan.reduce((s, p) => s + p.nestali.length, 0);
+  const ostataka = plan.reduce((s, p) => s + p.ostaci.length, 0);
+  const m2Ostataka = plan.reduce((s, p) => s + p.m2Ostataka, 0);
+  const m2Skarta = plan.reduce((s, p) => s + p.m2Skarta, 0);
 
   $('#pel-table-zbir').innerHTML =
     `<div class="stav"><span>Plaćaš po m² — DrvoLux zadrži višak</span><b class="num">${rsd(poM2)} RSD</b></div>
      <div class="stav"><span>Cele table — višak ostaje tebi</span><b class="num">${rsd(poTablama)} RSD</b></div>
      <div class="stav jaka"><span>Razlika</span><b class="num">${rsd(poTablama - poM2)} RSD</b></div>
-     <div class="hint" style="margin-top:8px">U cenu projekta ulazi iznos po m². Cene celih tabli su ti tu da vidiš koliko bi te koštalo da zadržiš viškove.</div>
+     <div class="stav"><span>Upotrebljiv višak — ${ostataka} ${ostataka === 1 ? 'komad' : 'komada'} preko ${profil.min_ostatak ?? 300} mm</span><b class="num">${m2Ostataka.toFixed(2)} m²</b></div>
+     <div class="stav"><span>Škart</span><b class="num">${m2Skarta.toFixed(2)} m²</b></div>
+     <div class="hint" style="margin-top:8px">U cenu projekta ulazi iznos po m². Rez ${profil.kerf ?? 5} mm, odmak ${profil.odmak_table ?? 10} mm — menja se u Podešavanjima.</div>
      ${nestali ? `<div class="poruka vidljiva gre" style="margin-top:10px">${nestali} ${nestali === 1 ? 'deo je veći' : 'delova je veće'} od same table — proveri dimenzije elementa.</div>` : ''}`;
 
   $('#pel-table-telo').querySelectorAll('[data-raspored]').forEach(b =>
@@ -576,6 +589,125 @@ function prikaziRaspored(p) {
     ${p.table.map((t, i) => crtezTable(t, p.ploca, i)).join('')}
     <div class="hint">Rez testere 5 mm, odmak od ivice 10 mm. Delovi označeni sa ↻ su okrenuti.</div>
   `, null);
+}
+
+/* ---------- izvoz krojne liste ----------
+   CSV je tačka-zarez razdvojen i sa BOM-om, jer ga tako i Excel na
+   srpskom i optimizatori (OptiCut, CutRite, Ardis) otvore bez pitanja.
+   Kolone su standardna lista delova: mera, količina, materijal, kant.  */
+function redoviKrojneListe(z) {
+  const redovi = [];
+  z.elementi.forEach(e => {
+    const mat = materijaliZa(e.konfiguracija_id);
+    generisiDelove(e.parametri || {}).forEach(d => {
+      const m = mat ? mat[d.grupa] : null;
+      redovi.push({
+        element: e.naziv,
+        naziv: d.naziv,
+        duzina: d.duzina,
+        sirina: d.sirina,
+        kom: d.kom,
+        materijal: m ? m.naziv : 'nije izabran',
+        tekstura: m && m.tekstura ? 'da' : 'ne',
+        kant: d.kant,
+      });
+    });
+  });
+  return redovi;
+}
+
+function izveziCSV() {
+  if (!aktivan) return;
+  const z = zbirProjekta(aktivan);
+  const redovi = redoviKrojneListe(z);
+  if (!redovi.length) return poruka($('#pr-poruka'), 'Projekat nema nijedan element.', 'gre');
+
+  const ivica = (r, i) => r.kant.includes(i) ? 1 : 0;
+  const zaglavlje = ['Materijal', 'Deo', 'Element', 'Duzina', 'Sirina', 'Kolicina',
+                     'Tekstura', 'Kant gore', 'Kant dole', 'Kant levo', 'Kant desno'];
+
+  const linije = [zaglavlje.join(';')].concat(redovi.map(r => [
+    r.materijal, r.naziv, r.element, r.duzina, r.sirina, r.kom, r.tekstura,
+    ivica(r, 'gore'), ivica(r, 'dole'), ivica(r, 'levo'), ivica(r, 'desno'),
+  ].map(v => (typeof v === 'string' && /[;"\n]/.test(v)) ? `"${v.replace(/"/g, '""')}"` : v).join(';')));
+
+  preuzmi(`krojna-lista-${imeFajla(aktivan.naziv)}.csv`,
+          '﻿' + linije.join('\r\n'), 'text/csv;charset=utf-8');
+  poruka($('#pr-poruka'), `Krojna lista izvezena — ${redovi.length} stavki.`, 'ok');
+}
+
+function imeFajla(s) {
+  return String(s).toLowerCase()
+    .replace(/[čćĉ]/g, 'c').replace(/[šŝ]/g, 's').replace(/[žŵ]/g, 'z').replace(/đ/g, 'dj')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'projekat';
+}
+
+function preuzmi(ime, sadrzaj, tip) {
+  const veza = document.createElement('a');
+  veza.href = URL.createObjectURL(new Blob([sadrzaj], { type: tip }));
+  veza.download = ime;
+  document.body.appendChild(veza);
+  veza.click();
+  document.body.removeChild(veza);
+  setTimeout(() => URL.revokeObjectURL(veza.href), 1000);
+}
+
+/* PDF ide kroz štampu pregledača — „Sačuvaj kao PDF" u dijalogu.
+   Bez biblioteke i bez build koraka, kako i treba ovom projektu.       */
+function stampajKrojnuListu() {
+  if (!aktivan) return;
+  const z = zbirProjekta(aktivan);
+  const plan = planZaProjekat(z);
+  const redovi = redoviKrojneListe(z);
+  if (!redovi.length) return poruka($('#pr-poruka'), 'Projekat nema nijedan element.', 'gre');
+
+  const kantOpis = (kant) => kant.length
+    ? kant.map(i => ({ gore: 'G', dole: 'D', levo: 'L', desno: 'R' }[i])).join(' ')
+    : '—';
+
+  const poMaterijalu = {};
+  redovi.forEach(r => (poMaterijalu[r.materijal] = poMaterijalu[r.materijal] || []).push(r));
+
+  $('#stampa').innerHTML = `
+    <div class="stampa-glava">
+      <div>
+        <div class="stampa-firma">${esc(profil.naziv_firme || 'By Simic Studio')}</div>
+        <div class="stampa-sitno">${esc(profil.telefon || '')} ${esc(profil.email_kontakt || '')}</div>
+      </div>
+      <div class="stampa-desno">
+        <div class="stampa-naslov">Krojna lista</div>
+        <div class="stampa-sitno">${esc(aktivan.naziv)}${aktivan.klijent ? ' · ' + esc(aktivan.klijent) : ''}</div>
+        <div class="stampa-sitno num">${new Date().toLocaleDateString('sr-RS')}</div>
+      </div>
+    </div>
+
+    <div class="stampa-uslovi num">
+      Rez ${profil.kerf ?? 5} mm · odmak od ivice ${profil.odmak_table ?? 10} mm ·
+      najmanji ostatak ${profil.min_ostatak ?? 300} mm
+    </div>
+
+    ${Object.entries(poMaterijalu).map(([mat, lista]) => {
+      const p = plan.find(x => x.materijal.naziv === mat);
+      return `<section class="stampa-blok">
+        <h3>${esc(mat)}${p ? ` — ${p.brojTabli} × ${p.ploca.duzina}×${p.ploca.sirina}${p.tekstura ? ', tekstura' : ''}` : ''}</h3>
+        <table class="stampa-tabela">
+          <thead><tr><th>Deo</th><th>Element</th><th class="r">Dužina</th><th class="r">Širina</th><th class="r">Kom</th><th>Kant</th></tr></thead>
+          <tbody>${lista.map(r => `<tr>
+            <td>${esc(r.naziv)}</td><td>${esc(r.element)}</td>
+            <td class="r num">${r.duzina}</td><td class="r num">${r.sirina}</td>
+            <td class="r num">${r.kom}</td><td class="num">${kantOpis(r.kant)}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+        ${p ? p.table.map((t, i) => crtezTable(t, p.ploca, i)).join('') : ''}
+      </section>`;
+    }).join('')}
+
+    <div class="stampa-sitno">G gore · D dole · L levo · R desno. Delovi sa ↻ su okrenuti u odnosu na unetu meru.</div>`;
+
+  document.body.classList.add('stampanje');
+  const ocisti = () => { document.body.classList.remove('stampanje'); window.removeEventListener('afterprint', ocisti); };
+  window.addEventListener('afterprint', ocisti);
+  window.print();
 }
 
 /* Uređivanje ide kroz Element tab — nema smisla praviti drugu formu za
@@ -1137,6 +1269,8 @@ export function povezProjekte() {
 
   $('#pel-novi').onclick   = noviElementUProjektu;
   $('#pel-sablon').onclick = izSablona;
+  $('#pel-csv').onclick    = izveziCSV;
+  $('#pel-stampa').onclick = stampajKrojnuListu;
   $('#pok-novi').onclick   = formaRucnogOkova;
   $('#rad-forma').addEventListener('submit', sacuvajRad);
   $('#rokovi-forma').addEventListener('submit', sacuvajRokove);
