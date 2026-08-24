@@ -139,6 +139,27 @@ Sledeće:
 - Prelom je na 860 px. Tabele klize vodoravno unutar `.tabela-skrol`, sve ostalo
   mora da stane u širinu ekrana.
 
+## Svaki ekran se radi za telefon i desktop odjednom
+
+Filip radi na oba — u radionici na telefonu, uveče za stolom. Nova stvar nije
+gotova dok ne radi na oba, u istom potezu. Ne „pa ćemo posle za telefon”.
+
+Pre nego što se kaže da je gotovo, proveri **na 1280 px**:
+- bočna traka stoji, hamburger je sakriven
+- `.el-mreza` je dvokolonska — forma levo, rezime u `.el-desno` desno
+- podtabovi imaju pun razmak (`10px 14px`)
+
+i **na 375 px**:
+- stranica ne preliva u stranu: `document.documentElement.scrollWidth <= innerWidth`
+  na **svakoj** strani i **svakom** podtabu, ne samo na onom koji si menjao
+- svi podtabovi staju u red bez skrolovanja — kad se doda nov, suzi razmak
+  dok `scrollWidth <= clientWidth`, ne ostavljaj da klizi
+- `.field-grid` pada u jednu kolonu, polja sa `max-width` idu celom širinom
+- sitna dugmad (`.ikona-btn`, strelice na kartici) imaju metu za prst, ~36 px
+
+Vodoravno klizanje je dozvoljeno **samo** unutar `.tabela-skrol` i `.podtabovi`.
+Ako preliva bilo šta drugo, to je greška, ne osobina.
+
 ## Ne raditi
 
 - Ne uvoditi build korak, bundler ni framework — Filip menja fajlove preko GitHub weba.
