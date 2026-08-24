@@ -476,6 +476,7 @@ table.tab th.r, table.tab td.r { text-align: right; }
 .znacka.ploca { background: var(--blueprint-soft); color: var(--blueprint); }
 .znacka.kant  { background: var(--profit-soft);   color: var(--profit); }
 .znacka.auto  { background: #F1EAD8; color: #7A5C12; }
+.znacka.tekstura { background: #EDE6DC; color: #6B5334; margin-left: 4px; }
 
 .cena-glavna { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .cena-rabat {
@@ -792,6 +793,27 @@ svg.ivice { display: block; }
 
 .stav.jaka { border-top: 1px solid var(--line); border-bottom: none; margin-top: 4px; padding-top: 10px; }
 .stav.jaka b { font-size: 15px; }
+
+/* ---------- raspored delova po tabli ---------- */
+.tabla-crtez { margin-bottom: 16px; }
+.tabla-glava {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin-bottom: 6px;
+}
+.tabla-glava .num { font-size: 11px; letter-spacing: 0; color: var(--ink-3); text-transform: none; }
+.tabla-crtez svg {
+  display: block;
+  background: var(--surface);
+  border-radius: var(--r-sm);
+}
 
 /* ---------- vremeplov na tabu Rokovi ---------- */
 .rok-red {

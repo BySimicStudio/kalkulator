@@ -32,6 +32,7 @@ js/element.js       forma elementa, skica, izbor ivica, prikaz cene
 js/projekti.js      kanban, projekat i pet podtabova
 schema.sql          kompletna šema baze (referenca, već je pokrenuta)
 schema-faza2.sql    tabele za projekte (idempotentna, pokreće se u SQL editoru)
+schema-secenje.sql  kolona tekstura na materijalima (idempotentna)
 ```
 
 `motor.js` mora ostati bez DOM zavisnosti — to je jedini deo koji se testira izolovano.
@@ -81,6 +82,25 @@ Ivice `gore`/`dole` nose dužinu dela, `levo`/`desno` njegovu širinu.
   vuče se iz `profili.rabat_dobavljac`.
 - Standardna tabla bele iverice: 2800 × 2070.
 
+## Sečenje — NE MENJATI bez Filipove potvrde
+
+- Rez testere (kerf) **5 mm**, odmak od ivice table **10 mm sa sve četiri strane**.
+- **Tekstura** je osobina materijala (`materijali.tekstura`). Ploča sa šarom se pri
+  sečenju ne okreće — delovi idu samo u jednom pravcu. Bela i jednobojna se okreću
+  slobodno. Razlika nije mala: ista krila znaju da traže tablu više.
+- Delovi se grupišu **po materijalu, ne po elementu** — isti materijal iz raznih
+  elemenata seče se sa istih tabli. Leđa idu na svoju tablu (HDF 1803 × 2070).
+- Rade **dve metode pakovanja** i uzima se ona sa manje tabli: slobodno (deo ide u
+  najtešnju rupu) i po trakama (kao panel testera — traka preko table, pa komadi iz
+  nje). Kod nameštaja se mere ponavljaju, pa trake obično pobede.
+- Najtešnje ležište se meri **kraćom preostalom stranicom**, ne ostatkom površine.
+  Po površini rotacija nikad ne bi bila izabrana — okrenut deo ima istu površinu.
+
+**Cena ostaje po m².** DrvoLux naplaćuje iskorišćeno i zadržava višak koji može da
+preproda, pa je to Filipov stvarni trošak i to ulazi u cenu projekta. Cena celih
+tabli se **samo prikazuje**, za slučaj kad hoće da zadrži viškove za sebe.
+Materijal u svakom slučaju plaća klijent.
+
 ## Rad i profit — NE MENJATI bez Filipove potvrde
 
 Sve stope dolaze iz `profili`, količine iz `projekti`. Računa `izracunajProjekat`.
@@ -121,10 +141,15 @@ ne po UTC, jer bi `toISOString()` pre dva ujutru upisao jučerašnji datum.
 Projekat pamti **parametre elementa, ne iznos** — cena se svaki put izračuna kroz
 motor, pa promena cenovnika sama povuče sve projekte.
 
+**Sečenje** — guillotine raspored sa vizuelnim prikazom table, broj tabli i otpad
+po materijalu, cena po m² i po celim tablama. Vidi se u projektu, podtab Elementi,
+kartica „Table i sečenje".
+
 Sledeće:
-1. **Optimizacija sečenja** — guillotine raspored, kerf 5 mm, odmak 10 mm,
-   vizuelni prikaz, ostaci i naplata.
-2. **Klijenti i predračun** — PDF ponuda, ugovor, garancija.
+1. **Zalihe viškova** — šta je ostalo od prethodnih poslova i može da se upotrebi
+   umesto nove table. Tek to zatvara priču o otpadu.
+2. **Klijenti i predračun** — PDF ponuda, ugovor, garancija. Štampa iz pregledača
+   uz `@media print`, bez biblioteka i bez build koraka.
 
 ## Konvencije
 

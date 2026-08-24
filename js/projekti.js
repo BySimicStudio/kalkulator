@@ -7,6 +7,7 @@ import { db, poruka, otvori, korisnik } from './app.js';
 import { otvoriModal, zatvoriModal, vred, broj, esc, rsd } from './ui.js';
 import {
   generisiDelove, zbirniPodaci, autoOkovi, izracunajCenu, izracunajProjekat,
+  planSecenja,
 } from './motor.js';
 import { trenutniElement, postaviElement } from './element.js';
 
@@ -442,6 +443,8 @@ function prikaziPodtab(ime) {
    PODTAB — ELEMENTI
    =================================================================== */
 function crtajElemente(z) {
+  crtajTable(z);
+
   if (!z.elementi.length) {
     $('#pel-prazno').style.display = 'block';
     $('#pel-tabela-okvir').style.display = 'none';
@@ -477,6 +480,102 @@ function crtajElemente(z) {
   telo.querySelectorAll('[data-el-izmeni]').forEach(b => b.onclick = () => urediUElementu(b.dataset.elIzmeni));
   telo.querySelectorAll('[data-el-kopija]').forEach(b => b.onclick = () => kopirajElement(b.dataset.elKopija));
   telo.querySelectorAll('[data-el-brisi]').forEach(b => b.onclick = () => obrisiElement(b.dataset.elBrisi));
+}
+
+/* ---------- table i sečenje ----------
+   Delovi svih elemenata se skupe i grupišu po materijalu, jer se isti
+   materijal iz raznih elemenata seče sa istih tabli. Cena po m² ostaje
+   ono što DrvoLux naplati kad zadrži višak; cena celih tabli je koliko
+   bi bilo da viškove uzimaš sebi.                                       */
+function planZaProjekat(z) {
+  const stavke = [];
+  z.elementi.forEach(e => {
+    const mat = materijaliZa(e.konfiguracija_id);
+    if (!mat) return;
+    generisiDelove(e.parametri || {}).forEach(deo => {
+      const m = mat[deo.grupa];
+      if (m) stavke.push({ deo, materijal: m });
+    });
+  });
+  return planSecenja(stavke, rabat());
+}
+
+function crtajTable(z) {
+  const plan = planZaProjekat(z);
+  const kutija = $('#pel-table');
+
+  if (!plan.length) { kutija.style.display = 'none'; return; }
+  kutija.style.display = 'block';
+
+  $('#pel-table-telo').innerHTML = plan.map((p, i) => `<tr>
+    <td>
+      <div class="red-naziv">${esc(p.materijal.naziv)}</div>
+      <div class="red-sifra">${p.ploca.duzina}×${p.ploca.sirina}${p.tekstura ? ' · tekstura' : ''}</div>
+    </td>
+    <td class="num r">${p.m2Delova.toFixed(2)}</td>
+    <td class="num r">${p.brojTabli}</td>
+    <td class="num r ${p.otpadProcenat > 30 ? 'lose' : ''}">${p.otpadProcenat.toFixed(0)}%</td>
+    <td class="num r">${rsd(p.cenaPoM2)}</td>
+    <td class="num r" style="color:var(--ink-2)">${rsd(p.cenaPoTablama)}</td>
+    <td class="r"><button class="ikona-btn" data-raspored="${i}">Raspored</button></td>
+  </tr>`).join('');
+
+  const poM2 = plan.reduce((s, p) => s + p.cenaPoM2, 0);
+  const poTablama = plan.reduce((s, p) => s + p.cenaPoTablama, 0);
+  const nestali = plan.reduce((s, p) => s + p.nestali.length, 0);
+
+  $('#pel-table-zbir').innerHTML =
+    `<div class="stav"><span>Plaćaš po m² — DrvoLux zadrži višak</span><b class="num">${rsd(poM2)} RSD</b></div>
+     <div class="stav"><span>Cele table — višak ostaje tebi</span><b class="num">${rsd(poTablama)} RSD</b></div>
+     <div class="stav jaka"><span>Razlika</span><b class="num">${rsd(poTablama - poM2)} RSD</b></div>
+     <div class="hint" style="margin-top:8px">U cenu projekta ulazi iznos po m². Cene celih tabli su ti tu da vidiš koliko bi te koštalo da zadržiš viškove.</div>
+     ${nestali ? `<div class="poruka vidljiva gre" style="margin-top:10px">${nestali} ${nestali === 1 ? 'deo je veći' : 'delova je veće'} od same table — proveri dimenzije elementa.</div>` : ''}`;
+
+  $('#pel-table-telo').querySelectorAll('[data-raspored]').forEach(b =>
+    b.onclick = () => prikaziRaspored(plan[b.dataset.raspored]));
+}
+
+/* Crtež table sa razmeštenim delovima — mere su u milimetrima, pa je
+   viewBox baš tabla i sve se skalira samo.                             */
+function crtezTable(tabla, ploca, redni) {
+  const delovi = tabla.delovi.map(d => {
+    const malo = Math.min(d.duzina, d.sirina) < 260;
+    return `<g>
+      <rect x="${d.x}" y="${d.y}" width="${d.duzina}" height="${d.sirina}"
+            fill="var(--blueprint-soft)" stroke="var(--blueprint)" stroke-width="4"/>
+      ${malo ? '' : `<text x="${d.x + d.duzina / 2}" y="${d.y + d.sirina / 2 - 10}"
+            text-anchor="middle" font-family="var(--font-mono)" font-size="72" fill="var(--blueprint)">
+        ${(d.duzina / 10).toFixed(1)}×${(d.sirina / 10).toFixed(1)}</text>`}
+      ${malo ? '' : `<text x="${d.x + d.duzina / 2}" y="${d.y + d.sirina / 2 + 62}"
+            text-anchor="middle" font-family="var(--font-ui)" font-size="58" fill="var(--ink-2)">
+        ${esc(d.naziv)}${d.okrenut ? ' ↻' : ''}</text>`}
+    </g>`;
+  }).join('');
+
+  return `<div class="tabla-crtez">
+    <div class="tabla-glava">
+      <span>Tabla ${redni + 1}</span>
+      <span class="num">${ploca.duzina} × ${ploca.sirina} · ${tabla.delovi.length} kom</span>
+    </div>
+    <svg viewBox="0 0 ${ploca.duzina} ${ploca.sirina}" width="100%" role="img"
+         aria-label="Raspored delova na tabli ${redni + 1}">
+      <rect x="0" y="0" width="${ploca.duzina}" height="${ploca.sirina}"
+            fill="var(--surface-2)" stroke="var(--line)" stroke-width="6"/>
+      ${delovi}
+    </svg>
+  </div>`;
+}
+
+function prikaziRaspored(p) {
+  otvoriModal(`Raspored — ${p.materijal.naziv}`, `
+    <div class="stav"><span>Tabli</span><b class="num">${p.brojTabli} × ${p.ploca.duzina}×${p.ploca.sirina}</b></div>
+    <div class="stav"><span>Iskorišćeno</span><b class="num">${p.m2Delova.toFixed(2)} m² od ${p.m2Tabli.toFixed(2)} m²</b></div>
+    <div class="stav"><span>Otpad</span><b class="num">${p.otpadProcenat.toFixed(0)}%</b></div>
+    ${p.tekstura ? '<div class="hint" style="margin-top:8px">Ploča ima teksturu — delovi se ne okreću, pa otpada bude više.</div>' : ''}
+    <div class="pod-sekcija">Table</div>
+    ${p.table.map((t, i) => crtezTable(t, p.ploca, i)).join('')}
+    <div class="hint">Rez testere 5 mm, odmak od ivice 10 mm. Delovi označeni sa ↻ su okrenuti.</div>
+  `, null);
 }
 
 /* Uređivanje ide kroz Element tab — nema smisla praviti drugu formu za

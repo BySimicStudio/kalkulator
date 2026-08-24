@@ -62,7 +62,10 @@ function crtajMaterijale() {
         <div class="red-naziv">${esc(m.naziv)}</div>
         ${m.sifra ? `<div class="red-sifra">${esc(m.sifra)}</div>` : ''}
       </td>
-      <td><span class="znacka ${m.vrsta}">${m.vrsta === 'ploca' ? 'ploča' : 'kant'}</span></td>
+      <td>
+        <span class="znacka ${m.vrsta}">${m.vrsta === 'ploca' ? 'ploča' : 'kant'}</span>
+        ${m.tekstura ? '<span class="znacka tekstura">tekstura</span>' : ''}
+      </td>
       <td class="r">
         <div class="cena-glavna">${rsd(m.cena)} / ${jed}</div>
         ${rabat ? `<div class="cena-rabat">${rsd(sa)} sa rabatom</div>` : ''}
@@ -127,6 +130,11 @@ function formaMaterijala(m = null) {
       <label for="f-dobavljac">Dobavljač</label>
       <input type="text" id="f-dobavljac" value="${esc(je.dobavljac || '')}">
     </div>
+    <label class="prekidac">
+      <input type="checkbox" id="f-tekstura" ${je.tekstura ? 'checked' : ''}>
+      Ploča ima teksturu — šara ide u jednom pravcu
+    </label>
+    <div class="hint">Delovi sa teksturom se pri sečenju ne smeju okretati, pa sa table ode manje komada. Bela i jednobojna se slobodno okreću.</div>
   `, async () => {
     const naziv = vred('f-naziv');
     if (!naziv) return poruka($('#sif-poruka'), 'Materijal mora imati naziv.', 'gre');
@@ -140,6 +148,7 @@ function formaMaterijala(m = null) {
       ploca_duzina: broj('f-duzina'),
       ploca_sirina: broj('f-sirina'),
       dobavljac: vred('f-dobavljac') || null,
+      tekstura: $('#f-tekstura')?.checked || false,
     };
     if (m) red.id = m.id;
 
