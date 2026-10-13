@@ -7,7 +7,7 @@ import { db, poruka, otvori, korisnik } from './app.js';
 import { otvoriModal, zatvoriModal, vred, broj, esc, rsd } from './ui.js';
 import {
   generisiDelove, zbirniPodaci, autoOkovi, izracunajCenu, izracunajProjekat,
-  planSecenja,
+  planSecenja, izracunajVoznje, trosakPoKm,
 } from './motor.js';
 import { trenutniElement, postaviElement } from './element.js';
 
@@ -35,6 +35,7 @@ const idRoka = (kolona) => 'pr-' + kolona.replace(/_/g, '-');
 let projekti = [];
 let sviElementi = [];      // elementi svih projekata — kanban računa iz njih
 let sviOkovi = [];         // ručno dodati okovi svih projekata
+let sveVoznje = [];        // vožnje svih projekata
 let materijali = [];
 let konfiguracije = [];
 let okovi = [];
@@ -56,7 +57,7 @@ const matPoId  = (id) => materijali.find(m => m.id == id) || null;
    UČITAVANJE
    =================================================================== */
 export async function ucitajProjekte() {
-  const [p, e, o, m, k, ok, pr] = await Promise.all([
+  const [p, e, o, m, k, ok, pr, v] = await Promise.all([
     db.from('projekti').select('*').order('redosled').order('id', { ascending: false }),
     db.from('projekat_elementi').select('*').order('redosled').order('id'),
     db.from('projekat_okovi').select('*').order('id'),
@@ -64,6 +65,7 @@ export async function ucitajProjekte() {
     db.from('konfiguracije').select('*').order('naziv'),
     db.from('okovi').select('*').order('naziv'),
     db.from('profili').select('*').eq('id', korisnik().id).single(),
+    db.from('projekat_voznje').select('*').order('redosled').order('id'),
   ]);
 
   const greska = p.error || e.error;
@@ -80,6 +82,7 @@ export async function ucitajProjekte() {
   projekti      = p.data || [];
   sviElementi   = e.data || [];
   sviOkovi      = o.data || [];
+  sveVoznje     = v.data || [];
   materijali    = m.data || [];
   konfiguracije = k.data || [];
   okovi         = ok.data || [];
@@ -179,6 +182,9 @@ function zbirProjekta(projekat) {
   });
   const okoviRucno = rucni.reduce((s, x) => s + x.iznos, 0);
 
+  const mojeVoznje = sveVoznje.filter(v => v.projekat_id == projekat.id);
+  const voznje = mojeVoznje.length ? izracunajVoznje(mojeVoznje, profil) : null;
+
   const racun = izracunajProjekat({
     materijal,
     okovi: okoviAuto + okoviRucno,
@@ -192,11 +198,12 @@ function zbirProjekta(projekat) {
       popust:      projekat.popust,
     },
     profil,
+    voznje,
   });
 
   return {
     elementi: mojiElementi, materijal, okoviAuto, okoviRucno,
-    m2, komada, bezCene, autoLista: Array.from(auto.values()), rucni, racun,
+    m2, komada, bezCene, autoLista: Array.from(auto.values()), rucni, racun, voznje,
   };
 }
 
@@ -425,6 +432,7 @@ function crtajProjekat() {
   crtajElemente(z);
   crtajOkove(z);
   crtajRad();
+  crtajVoznje(z);
   crtajRokove();
   crtajCenu(z);
   crtajZadatke();
@@ -1001,6 +1009,8 @@ function crtajRad() {
     if (el) el.value = aktivan[kolona] ?? '';
   });
   $('#pr-marza').placeholder = `podrazumevano ${profil.marza_default ?? 0}`;
+  /* staro polje se vidi samo ako u njemu nešto stoji */
+  $('#red-stara-km').style.display = (Number(aktivan.kilometri) || 0) ? '' : 'none';
 
   const p = profil;
   $('#rad-cenovnik').innerHTML =
@@ -1010,6 +1020,171 @@ function crtajRad() {
      <div class="stav"><span>Dnevnica sa smeštajem</span><b class="num">${rsd(p.dnevnica)} RSD/dan</b></div>
      <div class="stav"><span>Put besplatno do</span><b class="num">${p.km_besplatno ?? 0} km</b></div>
      <div class="stav"><span>Put do 80 km / preko 80</span><b class="num">${rsd(p.km_cena_bliza)} / ${rsd(p.km_cena_dalja)} RSD/km</b></div>`;
+}
+
+/* ---------- vožnje ---------- */
+const SVRHE = {
+  materijal: 'Po materijal',
+  cnc:       'Do CNC-a',
+  montaza:   'Montaža',
+  merenje:   'Merenje',
+  dostava:   'Dostava komada',
+  ostalo:    'Ostalo',
+};
+const IME_NAPLATE = { ne: 'ne naplaćuje se', tarifa: 'po tarifi', fiksno: 'fiksno' };
+
+function crtajVoznje(z) {
+  /* stara kilometraža, dok je ne prebaci u vožnju */
+  const staraKm = Number(aktivan.kilometri) || 0;
+  const prebaci = $('#voz-stara');
+  if (staraKm && !z.voznje) {
+    prebaci.style.display = 'block';
+    prebaci.innerHTML = `<div class="poruka vidljiva rad" style="margin:0 0 14px">
+      Ovaj projekat ima staru kilometražu — <b class="num">${staraKm} km</b> u jednom smeru.
+      Dok ne upišeš vožnje, računa se po starom: samo prihod, bez troška kombija.
+      <button class="btn btn-sm" id="voz-prebaci" style="margin-top:8px">Prebaci u vožnju „Montaža"</button>
+    </div>`;
+    $('#voz-prebaci').onclick = () => prebaciStaruKm(staraKm);
+  } else {
+    prebaci.style.display = 'none';
+    prebaci.innerHTML = '';
+  }
+
+  const v = z.voznje;
+  if (!v) {
+    $('#voz-prazno').style.display = 'block';
+    $('#voz-tabela-okvir').style.display = 'none';
+    $('#voz-zbir').innerHTML = '';
+    return;
+  }
+  $('#voz-prazno').style.display = 'none';
+  $('#voz-tabela-okvir').style.display = 'block';
+
+  $('#voz-telo').innerHTML = v.redovi.map(r => `<tr>
+    <td>
+      <div class="red-naziv">${esc(SVRHE[r.svrha] || 'Ostalo')}</div>
+      <div class="red-sifra">${r.opis ? esc(r.opis) + ' · ' : ''}${r.povratno === false ? 'u jednom smeru' : 'povratno'}</div>
+    </td>
+    <td class="num r">${r.km}</td>
+    <td class="num r">${r.broj_puta}</td>
+    <td class="num r">${r.kmUkupno}</td>
+    <td class="num r">${rsd(r.trosak)}</td>
+    <td class="num r">${r.naplata === 'ne'
+      ? '<span style="color:var(--ink-3)">—</span>'
+      : rsd(r.prihod)}</td>
+    <td class="r"><div class="akcije">
+      <button class="ikona-btn" data-voz-izmeni="${r.id}">Izmeni</button>
+      <button class="ikona-btn opasno" data-voz-brisi="${r.id}">Obriši</button>
+    </div></td>
+  </tr>`).join('');
+
+  const telo = $('#voz-telo');
+  telo.querySelectorAll('[data-voz-izmeni]').forEach(b =>
+    b.onclick = () => formaVoznje(sveVoznje.find(x => x.id == b.dataset.vozIzmeni)));
+  telo.querySelectorAll('[data-voz-brisi]').forEach(b => b.onclick = async () => {
+    if (!confirm('Obrisati ovu vožnju?')) return;
+    const { error } = await db.from('projekat_voznje').delete().eq('id', b.dataset.vozBrisi);
+    if (error) return poruka($('#rad-poruka'), 'Nije obrisano: ' + error.message, 'gre');
+    await ucitajProjekte();
+  });
+
+  $('#voz-zbir').innerHTML =
+    `<div class="stav"><span>Ukupno pređeno</span><b class="num">${v.km} km</b></div>
+     <div class="stav"><span>Trošak kombija — ${v.poKm.toFixed(1)} RSD/km</span><b class="num">${rsd(v.trosak)} RSD</b></div>
+     <div class="stav"><span>Naplaćeno klijentu</span><b class="num">${rsd(v.prihod)} RSD</b></div>
+     <div class="stav jaka"><span>${v.prihod >= v.trosak ? 'Ostaje od prevoza' : 'Prevoz ide na tvoj račun'}</span>
+       <b class="num ${v.prihod >= v.trosak ? 'dobro' : 'lose'}">${rsd(v.prihod - v.trosak)} RSD</b></div>
+     ${!v.poKm ? '<div class="hint" style="margin-top:8px">Trošak po kilometru je nula — upiši potrošnju i cenu goriva u Podešavanjima.</div>' : ''}`;
+}
+
+async function prebaciStaruKm(km) {
+  if (!aktivan) return;
+  const { error } = await db.from('projekat_voznje').insert({
+    projekat_id: aktivan.id, svrha: 'montaza', opis: 'prebačeno iz stare kilometraže',
+    km, povratno: true, broj_puta: 1, naplata: 'tarifa',
+  });
+  if (error) return poruka($('#rad-poruka'), 'Nije prebačeno: ' + error.message, 'gre');
+
+  await db.from('projekti').update({ kilometri: 0 }).eq('id', aktivan.id);
+  aktivan.kilometri = 0;
+  await ucitajProjekte();
+  poruka($('#rad-poruka'), 'Kilometraža prebačena u vožnju. Sad ulazi i u trošak.', 'ok');
+}
+
+function formaVoznje(v = null) {
+  if (!aktivan) return;
+  const je = v || { svrha: 'montaza', povratno: true, broj_puta: 1, naplata: 'tarifa', km: '' };
+
+  otvoriModal(v ? 'Izmena vožnje' : 'Nova vožnja', `
+    <div class="field-grid">
+      <div class="field">
+        <label for="vz-svrha">Svrha</label>
+        <select id="vz-svrha">
+          ${Object.entries(SVRHE).map(([k, ime]) =>
+            `<option value="${k}" ${je.svrha === k ? 'selected' : ''}>${ime}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label for="vz-opis">Opis</label>
+        <input type="text" id="vz-opis" value="${esc(je.opis || '')}" placeholder="npr. Bežanijska kosa">
+      </div>
+    </div>
+    <div class="field-grid">
+      <div class="field">
+        <label for="vz-km">Kilometara u jednom smeru</label>
+        <input type="number" id="vz-km" min="0" step="0.1" value="${je.km ?? ''}">
+      </div>
+      <div class="field">
+        <label for="vz-puta">Koliko puta</label>
+        <input type="number" id="vz-puta" min="1" step="1" value="${je.broj_puta ?? 1}">
+        <div class="hint">Dva dana montaže = 2</div>
+      </div>
+    </div>
+    <label class="prekidac">
+      <input type="checkbox" id="vz-povratno" ${je.povratno === false ? '' : 'checked'}>
+      Povratno — računa se i vožnja nazad
+    </label>
+
+    <div class="pod-sekcija">Naplata</div>
+    <div class="field">
+      <label for="vz-naplata">Kako se naplaćuje</label>
+      <select id="vz-naplata">
+        <option value="tarifa" ${je.naplata === 'tarifa' ? 'selected' : ''}>Po tarifi — tvoje cene po km</option>
+        <option value="fiksno" ${je.naplata === 'fiksno' ? 'selected' : ''}>Fiksno — dogovoren iznos</option>
+        <option value="ne"     ${je.naplata === 'ne'     ? 'selected' : ''}>Ne naplaćuje se</option>
+      </select>
+      <div class="hint">Tarifa oduzima servisni radijus od ${profil.km_besplatno ?? 0} km. Trošak kombija se broji u svakom slučaju.</div>
+    </div>
+    <div class="field" id="vz-red-iznos" style="max-width:calc(50% - 6px)">
+      <label for="vz-iznos">Fiksan iznos po vožnji (RSD)</label>
+      <input type="number" id="vz-iznos" min="0" value="${je.naplata_iznos ?? ''}">
+    </div>
+  `, async () => {
+    const red = {
+      projekat_id: aktivan.id,
+      svrha: vred('vz-svrha'),
+      opis: vred('vz-opis') || null,
+      km: broj('vz-km') ?? 0,
+      povratno: $('#vz-povratno').checked,
+      broj_puta: Math.max(1, broj('vz-puta') ?? 1),
+      naplata: vred('vz-naplata'),
+      naplata_iznos: broj('vz-iznos') ?? 0,
+    };
+    if (v) red.id = v.id;
+
+    const { error } = await db.from('projekat_voznje').upsert(red);
+    if (error) return poruka($('#rad-poruka'), 'Nije sačuvano: ' + error.message, 'gre');
+    zatvoriModal();
+    await ucitajProjekte();
+    poruka($('#rad-poruka'), v ? 'Vožnja izmenjena.' : 'Vožnja dodata.', 'ok');
+  }, v ? 'Sačuvaj' : 'Dodaj');
+
+  /* iznos ima smisla samo kad je naplata fiksna */
+  const osveziIznos = () => {
+    $('#vz-red-iznos').style.display = $('#vz-naplata').value === 'fiksno' ? '' : 'none';
+  };
+  $('#vz-naplata').onchange = osveziIznos;
+  osveziIznos();
 }
 
 async function sacuvajRad(e) {
@@ -1123,7 +1298,9 @@ function crtajCenu(z) {
     linija('Okovi + marža', r.prihod.okovi) +
     linija(`Rad — ${Number(aktivan.sati) || 0} h`, r.prihod.rad) +
     (r.prihod.spratovi ? linija(`Spratovi — ${aktivan.spratovi}`, r.prihod.spratovi) : '') +
-    (r.prihod.put ? linija(`Put — ${r.put.naplativiKm} km naplativo`, r.prihod.put) : '') +
+    (r.prihod.put ? linija(r.imaVoznje
+      ? `Prevoz — ${z.voznje.km} km u ${z.voznje.redovi.length} ${z.voznje.redovi.length === 1 ? 'vožnji' : 'vožnji'}`
+      : `Put — ${r.put.naplativiKm} km naplativo`, r.prihod.put) : '') +
     (r.prihod.smestaj ? linija(`Smeštaj — ${aktivan.dana_smestaj} dana`, r.prihod.smestaj) : '') +
     (r.prihod.popust ? linija(`Popust ${aktivan.popust}%`, -r.prihod.popust) : '') +
     linija('<b>Ukupno za klijenta</b>', r.prihod.ukupno, 'jaka');
@@ -1132,6 +1309,7 @@ function crtajCenu(z) {
     linija('Materijal — nabavno, sa rabatom', r.trosak.materijal) +
     linija('Okovi — nabavno, sa rabatom', r.trosak.okovi) +
     (r.trosak.pomocni ? linija(`Pomoćni radnik — ${aktivan.pomocni_dana} dana`, r.trosak.pomocni) : '') +
+    (r.trosak.put ? linija(`Kombi — ${z.voznje.km} km po ${z.voznje.poKm.toFixed(1)} RSD`, r.trosak.put) : '') +
     linija('<b>Ukupan trošak</b>', r.trosak.ukupno, 'jaka');
 
   $('#cena-metrike').innerHTML = `
@@ -1273,6 +1451,7 @@ export function povezProjekte() {
   $('#pel-stampa').onclick = stampajKrojnuListu;
   $('#pok-novi').onclick   = formaRucnogOkova;
   $('#rad-forma').addEventListener('submit', sacuvajRad);
+  $('#voz-nova').onclick = () => formaVoznje();
   $('#rokovi-forma').addEventListener('submit', sacuvajRokove);
   $('#pz-forma').addEventListener('submit', dodajZadatak);
 

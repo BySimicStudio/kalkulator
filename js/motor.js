@@ -228,7 +228,52 @@ export function izracunajPut(kilometri, profil = {}) {
   return { naplativiKm: naplativi, stopa, iznos: naplativi * stopa };
 }
 
-export function izracunajProjekat({ materijal = 0, okovi = 0, rad = {}, profil = {} }) {
+/* ---------------------------------------------------------------------
+   VOŽNJE
+   Jedan posao ima više vožnji: po materijal, do CNC-a, na montažu.
+   Gorivo i habanje se troše na svakoj, naplaćuje se samo deo njih.
+
+   voznja = { km, povratno, broj_puta, naplata: 'ne'|'tarifa'|'fiksno',
+              naplata_iznos }
+   --------------------------------------------------------------------- */
+export function trosakPoKm(profil = {}) {
+  const n = (x) => Number(x) || 0;
+  return (n(profil.kombi_potrosnja) / 100) * n(profil.cena_goriva) + n(profil.kombi_habanje);
+}
+
+export function izracunajVoznje(voznje = [], profil = {}) {
+  const poKm = trosakPoKm(profil);
+  const redovi = voznje.map(v => {
+    const km       = Number(v.km) || 0;
+    const puta     = Math.max(1, Number(v.broj_puta) || 1);
+    const smerova  = v.povratno === false ? 1 : 2;
+    const kmUkupno = km * smerova * puta;
+
+    let prihod = 0;
+    if (v.naplata === 'fiksno') {
+      prihod = (Number(v.naplata_iznos) || 0) * puta;
+    } else if (v.naplata === 'tarifa') {
+      /* servisni radijus se gleda po vožnji, u jednom smeru */
+      const preko = Math.max(0, km - (Number(profil.km_besplatno) || 0));
+      const stopa = km > 80
+        ? (Number(profil.km_cena_dalja) || 0)
+        : (Number(profil.km_cena_bliza) || 0);
+      prihod = preko * smerova * puta * stopa;
+    }
+
+    return { ...v, kmUkupno, trosak: kmUkupno * poKm, prihod };
+  });
+
+  return {
+    redovi,
+    poKm,
+    km:     redovi.reduce((s, r) => s + r.kmUkupno, 0),
+    trosak: redovi.reduce((s, r) => s + r.trosak, 0),
+    prihod: redovi.reduce((s, r) => s + r.prihod, 0),
+  };
+}
+
+export function izracunajProjekat({ materijal = 0, okovi = 0, rad = {}, profil = {}, voznje = null }) {
   const n = (x) => Number(x) || 0;
 
   const sati  = n(rad.sati);
@@ -241,9 +286,17 @@ export function izracunajProjekat({ materijal = 0, okovi = 0, rad = {}, profil =
   const iznosRada       = sati * n(profil.satnica);
 
   const iznosSpratova = n(rad.spratovi) * n(profil.cena_sprat);
-  const put           = izracunajPut(rad.kilometri, profil);
   const iznosSmestaja = n(rad.danaSmestaj) * n(profil.dnevnica);
-  const logistika     = iznosSpratova + put.iznos + iznosSmestaja;
+
+  /* Kad projekat ima upisane vožnje, one zamenjuju staro jedno polje
+     `kilometri` — i na strani prihoda i na strani troška. Projekti bez
+     vožnji računaju po starom, da se ništa ne promeni ispod ruke.      */
+  const put = izracunajPut(rad.kilometri, profil);
+  const imaVoznje  = !!voznje;
+  const prihodPuta = imaVoznje ? voznje.prihod : put.iznos;
+  const trosakPuta = imaVoznje ? voznje.trosak : 0;
+
+  const logistika = iznosSpratova + prihodPuta + iznosSmestaja;
 
   const prePopusta = prihodMaterijal + prihodOkovi + iznosRada + logistika;
   const popust     = prePopusta * popustProcenat;
@@ -251,7 +304,7 @@ export function izracunajProjekat({ materijal = 0, okovi = 0, rad = {}, profil =
 
   /* --- trošak --- */
   const pomocni = n(rad.pomocniDana) * n(profil.pomocni_dnevnica);
-  const trosak  = materijal + okovi + pomocni;
+  const trosak  = materijal + okovi + pomocni + trosakPuta;
 
   /* --- šta zaista ostaje --- */
   const zarada = prihod - trosak;
@@ -262,14 +315,15 @@ export function izracunajProjekat({ materijal = 0, okovi = 0, rad = {}, profil =
       okovi: prihodOkovi,
       rad: iznosRada,
       spratovi: iznosSpratova,
-      put: put.iznos,
+      put: prihodPuta,
       smestaj: iznosSmestaja,
       logistika,
       popust,
       ukupno: prihod,
     },
-    trosak: { materijal, okovi, pomocni, ukupno: trosak },
+    trosak: { materijal, okovi, pomocni, put: trosakPuta, ukupno: trosak },
     put,
+    imaVoznje,
     marzaProcenat: marza * 100,
     zarada,
     udeoZarade: prihod ? (zarada / prihod) * 100 : 0,

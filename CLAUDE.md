@@ -32,7 +32,8 @@ js/element.js       forma elementa, skica, izbor ivica, prikaz cene
 js/projekti.js      kanban, projekat i pet podtabova
 schema.sql          kompletna šema baze (referenca, već je pokrenuta)
 schema-faza2.sql    tabele za projekte (idempotentna, pokreće se u SQL editoru)
-schema-secenje.sql  kolona tekstura na materijalima (idempotentna)
+schema-secenje.sql  tekstura na materijalima + parametri reza (idempotentna)
+schema-voznje.sql   vožnje po projektu + trošak kombija (idempotentna)
 ```
 
 `motor.js` mora ostati bez DOM zavisnosti — to je jedini deo koji se testira izolovano.
@@ -115,13 +116,23 @@ Sve stope dolaze iz `profili`, količine iz `projekti`. Računa `izracunajProjek
 - logistika = spratovi × cena_sprat + put + dana_smestaj × dnevnica
 - popust se oduzima na kraju, procentom od svega gore
 
-**Put** — naplaćuje se samo preko servisnog radijusa, i to povratno
-- naplativi km = max(0, km − km_besplatno) × 2
-- stopa je `km_cena_bliza` do 80 km, `km_cena_dalja` preko 80
+**Vožnje** (`projekat_voznje`) — jedan posao ima više vožnji: po materijal, do
+CNC-a, na montažu. Gorivo i habanje se troše na svakoj, naplaćuje se samo deo.
+- trošak po km = (`kombi_potrosnja` / 100) × `cena_goriva` + `kombi_habanje`
+- pređeno = km × (povratno ? 2 : 1) × broj_puta, **svaka vožnja ulazi u trošak**
+- naplata po vožnji: `ne`, `tarifa` ili `fiksno`
+  - `tarifa` = max(0, km − km_besplatno) × smerova × broj_puta × stopa,
+    stopa je `km_cena_bliza` do 80 km, `km_cena_dalja` preko 80
+  - `fiksno` = `naplata_iznos` × broj_puta
+
+Staro polje `projekti.kilometri` radi po starom (`izracunajPut`, samo prihod, bez
+troška) **dok projekat nema ni jednu vožnju** — da se zatečenim projektima ništa ne
+promeni ispod ruke. Na tabu Rad stoji dugme koje ga prebaci u vožnju „Montaža".
 
 **Trošak** (šta tebi izlazi)
 - materijal i okovi po nabavnoj ceni, sa rabatom
 - pomoćni radnik = pomocni_dana × pomocni_dnevnica
+- kombi = pređeni km × trošak po km
 
 **Rezultat**
 - zarada = prihod − trošak
@@ -153,11 +164,16 @@ kartica „Table i sečenje". Parametri reza se menjaju u Podešavanjima.
 po ivicama) i štampa preko `@media print`, odakle ide „Sačuvaj kao PDF". Bez
 biblioteka i bez build koraka. Format CSV-a još nije proveren na mašini u DrvoLux-u.
 
+**Vožnje** — lista vožnji po projektu na tabu Rad, sa troškom kombija po
+kilometru i naplatom po vožnji. Kombi od tad ulazi u trošak; ranije nije, pa je
+zarada na starim projektima izgledala veća nego što je bila.
+
 Sledeće:
-1. **Zalihe viškova** — šta je ostalo od prethodnih poslova i može da se upotrebi
-   umesto nove table. Tek to zatvara priču o otpadu.
-2. **Klijenti i predračun** — PDF ponuda, ugovor, garancija. Štampa iz pregledača
-   uz `@media print`, bez biblioteka i bez build koraka.
+1. **Predračun / ponuda** — štampa iz pregledača uz `@media print`, kao krojna
+   lista. Stavke se vuku iz projekta, avans se već računa.
+2. **Zalihe viškova** — šta je ostalo od prethodnih poslova i može da se upotrebi
+   umesto nove table. Odloženo, Filip je rekao da trenutno nije bitno.
+3. **Klijenti** — kontakti i istorija saradnje, ugovor i garancija.
 
 ## Konvencije
 
@@ -192,6 +208,16 @@ i **na 375 px**:
 
 Vodoravno klizanje je dozvoljeno **samo** unutar `.tabela-skrol` i `.podtabovi`.
 Ako preliva bilo šta drugo, to je greška, ne osobina.
+
+**Dve zamke koje su se već desile, da se ne ponove:**
+
+- Tabela sa `min-width` unutar `.el-mreza` **razvuče kolonu grida** umesto da kliza
+  u svom okviru — grid stavka podrazumevano ne sme ispod svoje min-content širine.
+  Zato `.el-mreza > * { min-width: 0 }`. Isto važi za svaki novi grid.
+- Pri merenju prelivanja uzimaj `document.documentElement.clientWidth` **sveže u
+  svakom koraku**, ne `innerWidth` i ne zapamćenu vrednost: `innerWidth` u oknu
+  pregledača ume da bude izobličen skaliranjem, a pojava vertikalne skrol trake
+  menja `clientWidth` između dva merenja i daje lažne greške u oba smera.
 
 ## Ne raditi
 

@@ -121,6 +121,7 @@ const POLJA = [
   'km_besplatno', 'km_cena_bliza', 'km_cena_dalja',
   'marza_default', 'buffer_avans', 'rabat_dobavljac',
   'kerf', 'odmak_table', 'min_ostatak',
+  'kombi_potrosnja', 'cena_goriva', 'kombi_habanje',
 ];
 
 async function ucitajProfil() {
@@ -130,6 +131,15 @@ async function ucitajProfil() {
     const el = $(`#p-${k}`);
     if (el && data[k] !== null && data[k] !== undefined) el.value = data[k];
   });
+  osveziTrosakKm();
+}
+
+/* Koliko te kilometar košta — računa se dok kucaš, da se vidi odmah */
+function osveziTrosakKm() {
+  const n = (id) => Number($(`#p-${id}`)?.value) || 0;
+  const poKm = (n('kombi_potrosnja') / 100) * n('cena_goriva') + n('kombi_habanje');
+  const el = $('#p-trosak-km');
+  if (el) el.textContent = poKm ? `${poKm.toFixed(1)} RSD/km` : '—';
 }
 
 async function sacuvajProfil(e) {
@@ -176,6 +186,9 @@ async function init() {
   $$('.nav-item[data-strana]').forEach(b =>
     b.addEventListener('click', () => otvori(b.dataset.strana)));
   $('#odjava').addEventListener('click', odjavi);
+
+  ['kombi_potrosnja', 'cena_goriva', 'kombi_habanje'].forEach(k =>
+    $(`#p-${k}`)?.addEventListener('input', osveziTrosakKm));
 
   $('#meni-dugme').addEventListener('click', () => meni(!$('#sidebar').classList.contains('otvoren')));
   $('#sloj-meni').addEventListener('click', zatvoriMeni);

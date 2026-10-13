@@ -558,6 +558,10 @@ table.tab th.r, table.tab td.r { text-align: right; }
    ===================================================================== */
 
 .el-mreza { display: grid; grid-template-columns: 1fr 300px; gap: 14px; align-items: start; }
+/* Bez ovoga široka tabela unutra razvuče kolonu grida umesto da kliza
+   u svom okviru — grid stavka podrazumevano ne sme ispod min-content.  */
+.el-mreza > * { min-width: 0; }
+.mreza-ceo-red { grid-column: 1 / -1; }
 .el-desno { position: sticky; top: 84px; }
 
 .izbor { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
